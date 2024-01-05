@@ -1,0 +1,10 @@
+* cl-orgelctl
+*** Orm Finnendahl <orm.finnendahl@selma.hfmdk-frankfurt.de>
+
+    Lisp Steuerung für die Papierorgel des gleichnamigen Seminars von
+    Nicolas Buzzi und Orm Finnendahl im WS 22-23, SS 23, etc..
+    
+** License
+
+gpl 2.0 or later
+
