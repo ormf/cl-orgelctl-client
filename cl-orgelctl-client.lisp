@@ -1,4 +1,4 @@
-;;;; cl-orgelctl.lisp
+;;;; cl-orgelctl-client.lisp
 
 (in-package #:cl-orgelctl)
 
