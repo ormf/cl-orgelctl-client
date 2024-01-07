@@ -27,4 +27,4 @@
                (:file "osc")
                (:file "osc-midi")
 ;;;               (:file "ats-player")
-               (:file "cl-orgelctl-remote")))
+               (:file "cl-orgelctl-client")))

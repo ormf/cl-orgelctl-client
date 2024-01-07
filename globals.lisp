@@ -90,10 +90,10 @@ keynum, orgelno and partialno.")
 (defparameter *orgel-min-freq* (caar *orgel-freqs*))
 
 (defparameter *orgel-presets-file*
-  (asdf:system-relative-pathname :cl-orgelctl "presets/orgel-presets.lisp"))
+  (asdf:system-relative-pathname :cl-orgelctl-client "presets/orgel-presets.lisp"))
 
 (defparameter *route-presets-file*
-    (asdf:system-relative-pathname :cl-orgelctl "presets/route-presets.lisp"))
+    (asdf:system-relative-pathname :cl-orgelctl-client "presets/route-presets.lisp"))
 
 (defconstant +notch+ 1)
 (defconstant +bandp+ 0)
