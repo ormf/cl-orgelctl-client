@@ -6,7 +6,7 @@
 
 
 ;;(cm:cd "/home/orm/work/programmieren/lisp/cl-orgelctl-remote")
-(uiop:chdir (asdf:system-relative-pathname :cl-orgelctl-remote ""))
+(uiop:chdir (asdf:system-relative-pathname :cl-orgelctl-client ""))
 (load-orgel-presets)
 (load-route-presets)
 
