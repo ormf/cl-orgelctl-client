@@ -145,20 +145,20 @@ interpolating all values between presets <num> and <next>."
   (let ((swank::*emacs-connection* *emcs-conn*))
     (swank::eval-in-emacs
      `(progn
-        (setq orgel-preset-file ,(namestring (merge-pathnames "curr-preset.lisp" (asdf:system-source-directory :cl-orgelctl))))
+        (setq orgel-preset-file ,(namestring (merge-pathnames "curr-preset.lisp" (asdf:system-source-directory :cl-orgelctl-remote))))
         (find-file orgel-preset-file)
         (set-window-dedicated-p (get-buffer-window "curr-preset.lisp" t) t)
-        (load ,(namestring (merge-pathnames "edit-orgel-presets.el" (asdf:system-source-directory :cl-orgelctl))))
+        (load ,(namestring (merge-pathnames "edit-orgel-presets.el" (asdf:system-source-directory :cl-orgelctl-remote))))
         ) t)))
 
 #+slynk
 (defun define-elisp-code ()
   (slynk::eval-in-emacs
    `(progn
-      (setq orgel-preset-file ,(namestring (merge-pathnames "curr-preset.lisp" (asdf:system-source-directory :cl-orgelctl))))
+      (setq orgel-preset-file ,(namestring (merge-pathnames "curr-preset.lisp" (asdf:system-source-directory :cl-orgelctl-remote))))
       (find-file orgel-preset-file)
       (set-window-dedicated-p (get-buffer-window "curr-preset.lisp" t) t)
-      (load ,(namestring (merge-pathnames "sly-edit-orgel-presets.el" (asdf:system-source-directory :cl-orgelctl))))
+      (load ,(namestring (merge-pathnames "sly-edit-orgel-presets.el" (asdf:system-source-directory :cl-orgelctl-remote))))
       ) t))
 
 

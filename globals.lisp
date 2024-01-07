@@ -25,8 +25,28 @@
 (defparameter *debug* t
    "flag for printing debugging info.")
 
-(defparameter *orgelcount* 10
+(unless (boundp '*orgelcount*)
+  (defvar *orgelcount* 10)
   "total num of organs")
+
+(unless (fboundp 'make-orgel)
+  (defstruct orgel
+    (base-freq (make-instance 'model-slot) :type model-slot)
+    (phase (make-instance 'model-slot :val 1) :type model-slot)
+    (bias-pos (make-instance 'model-slot) :type model-slot)
+    (bias-bw (make-instance 'model-slot) :type model-slot)
+    (bias-type (make-instance 'model-slot :val 0) :type model-slot)
+    (main (make-instance 'model-slot) :type model-slot)
+    (min-amp (make-instance 'model-slot) :type model-slot)
+    (max-amp (make-instance 'model-slot) :type model-slot)
+    (ramp-up (make-instance 'model-slot) :type model-slot)
+    (ramp-down (make-instance 'model-slot) :type model-slot)
+    (exp-base (make-instance 'model-slot) :type model-slot)
+    (level (make-array 16 :initial-contents (v-collect (n 16) (make-instance 'model-slot))) :type simple-array)
+    (delay (make-array 16 :initial-contents (v-collect (n 16) (make-instance 'model-slot))) :type simple-array)
+    (q (make-array 16 :initial-contents (v-collect (n 16) (make-instance 'model-slot))) :type simple-array)
+    (gain (make-array 16 :initial-contents (v-collect (n 16) (make-instance 'model-slot))) :type simple-array)
+    (osc-level (make-array 16 :initial-contents (v-collect (n 16) (make-instance 'model-slot))) :type simple-array)))
 
 (defparameter *base-freqs*
   '(27.5 32.401794 38.49546 46.19711 56.132587 69.28748 87.30706 113.156204
@@ -80,27 +100,28 @@ keynum, orgelno and partialno.")
 (defconstant +phase+ 1)
 (defconstant +invert+ -1)
 
-#|;;; the current state of all orgel vars:
+;;; the current state of all orgel vars: In case cl-orgel-gui is used,
+;;; this needs to be defined there so we only define it in case it
+;;; hasn't already been defined.
 
-(defparameter *curr-state*
-  (make-array
-   *orgelcount*
-   :element-type 'orgel
-   :initial-contents (loop for i below *orgelcount* collect (make-orgel)))
-  "State of all faders of the orgel on the pd side.")
-|#
+(unless (boundp '*curr-state*)
+  (defparameter *curr-state*
+    (make-array
+     *orgelcount*
+     :element-type 'orgel
+     :initial-contents (loop for i below *orgelcount* collect (make-orgel)))
+    "State of all faders of the orgel on the pd side."))
 
-#|
-(defparameter *orgel-mlevel*
-  (make-array *orgelcount*
-              :element-type 'simple-array
-              :initial-contents
-              (loop
-                for i below *orgelcount*
-                collect (make-array 16 :element-type 'float
-                                       :initial-contents (loop for x below 16 collect 0.0))))
-  "all volume levels currently measured in pd (permanently updated).")
-|#
+(unless (boundp '*orgel-mlevel*)
+  (defparameter *orgel-mlevel*
+    (make-array *orgelcount*
+                :element-type 'simple-array
+                :initial-contents
+                (loop
+                  for i below *orgelcount*
+                  collect (make-array 16 :element-type 'float
+                                         :initial-contents (loop for x below 16 collect 0.0))))
+    "all volume levels currently measured in pd (permanently updated)."))
 
 (defparameter *orgeltargets* (make-hash-table)
   "lookup of orgelname (as keyword) or orgelnumber (starting from 1 to

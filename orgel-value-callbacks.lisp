@@ -2,13 +2,13 @@
 ;;; orgel-value-callbacks.lisp
 ;;;
 ;;; callback functions when a value changes (triggered by osc messages
-;;; or by fader movements in the html gui).
+;;; from the lisp server or by midi-controllers or calling of value
+;;; changing functions).
 ;;;
 ;;; the callback does 3 things:
 ;;;
 ;;; 1. update the respective slot of *curr-state*
-;;; 2. set the faders in the html gui
-;;; 3. set the values on the pd side
+;;; 2. send this to the lisp server.
 ;;;
 ;;; the src argument is nil if the values are received from osc and
 ;;; therefore the callbacks don't send to pd (another mechanism has to
@@ -49,6 +49,8 @@
 ;;;   route-presets (like controller actions and such with
 ;;;   digest-route-preset).
 
+#|
+
 (defun orgel-global-value-callback (orgelidx target value src)
   "callback function if a global value changes (either through gui
 interaction or by responding to osc events)."
@@ -60,11 +62,12 @@ interaction or by responding to osc events)."
   (let ((f-idx (round (1- faderidx))))
     (set-cell (aref (slot-value (aref *curr-state* orgelidx) target) f-idx) value :src src)))
 
-(defun orgel-mlevel-value-callback (orgelidx faderidx value src)
+(defun orgel-mlevel-value-callback (orgelidx faderno value src)
   "callback function if a meter level value changes (by responding to osc
 events from the dsp engine)."
   (let ((f-idx (round (1- faderidx))))
     (set-cell (aref (aref *orgel-mlevel* orgelidx) f-idx) value :src src)))
+|#
 
 (defun setup-ref-cell-hooks ()
   "Set up propagating changes in the model-slots of *curr-state* and
@@ -80,9 +83,9 @@ events from the dsp engine)."
          (let ((orgelidx orgelidx))
            (setf (set-cell-hook (slot-value global-orgel slot-sym))
                  (lambda (val &key src)
-                   (declare (ignorable src))
-;;;                   (format t "setup-ref-cell-hooks, slot-sym: ~a, val: ~a~%" slot-sym val)
-                   (if val (global-to-pd (orgel-name (1+ orgelidx)) slot-key val))
+                   (incudine.util:msg :info "setup-ref-cell-hooks, slot-sym: ~a, val: ~a src: ~a" slot-sym val src)
+                   (if (and val (not (equal src "osc")))
+                       (global-to-server (orgel-name (1+ orgelidx)) slot-key val))
  ;;; call the defined route functions
                    (dolist (fn (slot-value (aref *osc-responder-registry* orgelidx) slot-sym))
                      (funcall fn val))))))
@@ -92,32 +95,23 @@ events from the dsp engine)."
       (map nil (lambda (slot-sym slot-key)
                  (let ((orgelidx orgelidx))
                    (dotimes (faderidx 16)
-                     (let ((faderidx faderidx))
+                     (let* ((faderidx faderidx)
+                            (partial (1+ faderidx)))
                        (setf (set-cell-hook (aref (slot-value global-orgel slot-sym) faderidx))
                              (lambda (val &key src)
-                               (declare (ignorable src))
-;;;                               (format t "setup-ref-cell-hooks, slot-sym: ~a, fader-idx: ~a, val: ~a~%" slot-sym faderidx val)
-                               (if val (fader-to-pd (orgel-name (1+ orgelidx)) slot-key (1+ faderidx) val))
+                               (incudine.util:msg :info "setup-ref-cell-hooks, slot-sym: ~a, partial: val: ~a src: ~a" slot-sym partial val src)
+                               (if (and val (not (equal src "osc")))
+                                   (fader-to-server (orgel-name (1+ orgelidx)) slot-key partial val))
 ;;;                               (format t "setting: ~a ~a ~a ~a~%" (orgel-name (1+ orgelidx)) slot-key (1+ faderidx) val)
  ;;; call the defined route functions
                                (dolist (fn (aref (slot-value (aref *osc-responder-registry* orgelidx) slot-sym) faderidx))
                                  (funcall fn val))))))))
             *orgel-fader-target-syms*
             *orgel-fader-targets*)
-
-      (let* ((orgelidx orgelidx)
-             (slot-key :mlevel)
-             (global-meter-ref (aref *orgel-mlevel* orgelidx)))
-        (dotimes (faderidx 16)
-          (let ((faderidx faderidx))
-            (setf (set-cell-hook (aref global-meter-ref faderidx))
-                  (lambda (val &key src)
-                    (declare (ignorable src))
-                    (if val (fader-to-pd (orgel-name (1+ orgelidx)) slot-key (1+ faderidx) val)))))))
-      *orgel-fader-target-syms*
-      *orgel-fader-targets*))
+      ))
   (register-cc-ref-cell-hooks)
-  (register-notein-ref-cell-hooks))
-
+  (register-notein-ref-cell-hooks)
+  )
 
 ;;; (setup-ref-cell-hooks)
+*curr-state*

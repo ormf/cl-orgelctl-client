@@ -21,9 +21,19 @@
 (ql:quickload "cl-orgelctl")
 (in-package :cl-orgelctl)
 (incudine::remove-all-responders cm:*midi-in1*)
+(setup-ref-cell-hooks)
+(setf (incudine.util::logger-level) :warn)
+(setf (incudine.util::logger-level) :info)
+()
+(connect-to-server)
+(make-all-responders)
+*curr-state*
+incudine::*responders*
 
-(incudine.util::set-logger-level :info)
+(orgel-ctl-fader :orgel01 :level 1 (random 1.0))
 
+*curr-state*
+*client-id*
 (incudine:rt-start)
 
 (incudine:rt-status)

@@ -5,16 +5,27 @@
 (setf *debug* nil)
 
 
-;;(cm:cd "/home/orm/work/unterricht/frankfurt/ws_22_23/musikinformatik/papierorgel/lisp/cl-orgelctl")
-(uiop:chdir (asdf:system-relative-pathname :cl-orgelctl ""))
+;;(cm:cd "/home/orm/work/programmieren/lisp/cl-orgelctl-remote")
+(uiop:chdir (asdf:system-relative-pathname :cl-orgelctl-remote ""))
 (load-orgel-presets)
 (load-route-presets)
 
 ;;; (permute)
 
-(incudine:remove-all-responders *oscin*)
-(make-all-responders *orgelcount* *oscin*)
-(start-osc-midi-receive)
+(progn
+  (setf *local-host* "127.0.0.1")
+  (setf *local-port* 3016)
+  (setf *remote-host* "127.0.0.1")
+  (setf *remote-port* 3011)
+  (if *oscout* (incudine.osc:close *oscout*))
+  (if *oscin* (incudine.osc:close *oscin*))
+  (setf *oscout* (incudine.osc:open :port *remote-port* :host *remote-host* :direction :output :protocol :udp))
+  (setf *oscin* (incudine.osc:open :port *local-port* :host *local-host* :direction :input :protocol :udp)))
+(setf (incudine.util:logger-level) :info)
+(incudine:rt-start)
+(connect-to-server)
+
+;;; (start-osc-midi-receive)
 
 (cm:midi-open-default :direction :input)
 (cm:midi-open-default :direction :output)
