@@ -31,7 +31,7 @@
 incudine::*responders*
 
 (orgel-ctl-fader :orgel01 :level 1 (random 1.0))
-
+(setup-ref-cell-hooks)
 *curr-state*
 *client-id*
 (incudine:rt-start)

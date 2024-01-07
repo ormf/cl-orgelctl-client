@@ -21,7 +21,7 @@
   (if *oscin* (incudine.osc:close *oscin*))
   (setf *oscout* (incudine.osc:open :port *remote-port* :host *remote-host* :direction :output :protocol :udp))
   (setf *oscin* (incudine.osc:open :port *local-port* :host *local-host* :direction :input :protocol :udp)))
-(setf (incudine.util:logger-level) :info)
+(setf (incudine.util:logger-level) :warn)
 (incudine:rt-start)
 (connect-to-server)
 
@@ -56,5 +56,6 @@
 ;;; (incudine.osc:close *oscin*)
 
 (setup-ref-cell-hooks)
-(incudine:rt-start)
+;;; (incudine:rt-start)
+
 

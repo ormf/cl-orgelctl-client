@@ -83,7 +83,7 @@ events from the dsp engine)."
          (let ((orgelidx orgelidx))
            (setf (set-cell-hook (slot-value global-orgel slot-sym))
                  (lambda (val &key src)
-                   (incudine.util:msg :info "setup-ref-cell-hooks, slot-sym: ~a, val: ~a src: ~a" slot-sym val src)
+                   (incudine.util:msg :info "setup-ref-cell-hooks, slot-sym: ~a, val: ~a src: ~a to-server: ~a" slot-sym val src (and val (not (equal src "osc"))))
                    (if (and val (not (equal src "osc")))
                        (global-to-server (orgel-name (1+ orgelidx)) slot-key val))
  ;;; call the defined route functions
@@ -91,7 +91,6 @@ events from the dsp engine)."
                      (funcall fn val))))))
            *orgel-global-target-syms*
            *orgel-global-targets*)
-
       (map nil (lambda (slot-sym slot-key)
                  (let ((orgelidx orgelidx))
                    (dotimes (faderidx 16)
