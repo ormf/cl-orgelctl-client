@@ -3,7 +3,7 @@
 (when (find-package :slynk) (pushnew :slynk *features*))
 (when (find-package :swank) (pushnew :swank *features*))
 
-(asdf:defsystem #:cl-orgelctl-remote
+(asdf:defsystem #:cl-orgelctl-client
   :description "Remote Controller für HfMDK Orgelprojekt 2022-24"
   :author "Orm Finnendahl <orm.finnendahl@selma.hfmdk-frankfurt.de>"
   :depends-on (#:incudine #:cm-all #:cellctl ;;; #:ats-cuda
