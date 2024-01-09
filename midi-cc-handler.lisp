@@ -60,7 +60,7 @@
            (case (cm:status->opcode st)
              (:cc (let ((channel (cm:status->channel st))
                         (val (float (/ d2 127) 1.0)))
-                    (incudine::msg info "orgel-midi-responder: ~d ~d ~,2f" channel d1 val)
+                    (incudine::msg info "orgel-midi-responder: :cc ~d ~d ~,2f" channel d1 val)
                     (setf (ccin d1 channel) val))))))))
 
 (defun remove-orgel-cc-responder ()

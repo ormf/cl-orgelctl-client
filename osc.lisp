@@ -33,11 +33,12 @@
                             (remote-port *remote-port*)
                             (local-host *local-host*)
                             (local-port *local-port*))
-  (unless *oscin*
-    (incudine.osc:open :host local-host :port local-port))
+  (when *oscin* (incudine.osc:close *oscin*))
+  (setf *oscin* (incudine.osc:open :host local-host :port local-port))
   (make-all-responders)
   (incudine:recv-start *oscin*)
-  (unless *oscout* (incudine.osc:open :host remote-host :port remote-port :direction :output))
+  (when *oscout* (incudine.osc:close *oscout*))
+  (setf *oscout* (incudine.osc:open :host remote-host :port remote-port :direction :output))
   (unless (eq (incudine:rt-status) :started)
     (error "incudine rt not running! Please start first!"))
   (incudine:at (incudine:now) #'incudine.osc:message *oscout*
@@ -315,7 +316,9 @@ amps, etc.)"
     (set-cell
      (aref
       (slot-value (aref *curr-state* orgelidx)
-                  (target-key->sym target))
+                  (if (keywordp target)
+                      (read-from-string (format nil "~a" target))
+                      target))
       (1- partial))
      (float val 1.0))))
 

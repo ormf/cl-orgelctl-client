@@ -23,7 +23,7 @@
   (setf *oscin* (incudine.osc:open :port *local-port* :host *local-host* :direction :input :protocol :udp)))
 (setf (incudine.util:logger-level) :warn)
 (incudine:rt-start)
-(connect-to-server)
+;;; (connect-to-server)
 
 ;;; (start-osc-midi-receive)
 
@@ -57,5 +57,3 @@
 
 (setup-ref-cell-hooks)
 ;;; (incudine:rt-start)
-
-

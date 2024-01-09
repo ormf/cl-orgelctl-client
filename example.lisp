@@ -24,7 +24,7 @@
 ;;; (defparameter village02a nil)
 ;;; (defparameter village02b nil)
 
-(tracker (asdf:system-relative-pathname :cl-orgelctl "snd/village01.wav")
+(tracker (asdf:system-relative-pathname :cl-orgelctl-client "snd/village01.wav")
            'village01
            :start 0.0
            :hop-size 1/4
@@ -41,7 +41,7 @@
 
 (in-package :cl-orgelctl)
 
-(ats-cuda:coords)
+
 
 (progn
   (set-orgel-freqs
