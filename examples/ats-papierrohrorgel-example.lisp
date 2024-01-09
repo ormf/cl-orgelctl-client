@@ -79,7 +79,6 @@
 
 (ats-cuda::coords)
 
-(coords)
 (orgel-ctl-fader)
 
 (cm:events

@@ -348,8 +348,9 @@ element gets nil padded at the end."
              (orgel-ctl orgeltarget :exp-base 0.8)
              (orgel-ctl orgeltarget :phase 1)
              ))
-  (copy-orgel-preset *curr-state* (aref *orgel-presets* preset-no))
-  (save-orgel-presets))
+;;  (copy-orgel-preset *curr-state* (aref *orgel-presets* preset-no))
+;;  (save-orgel-presets)
+  )
 
 (defun wellenlaenge (freq &key (schallgeschwindigkeit 343.2))
   (/ schallgeschwindigkeit freq 2))

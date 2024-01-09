@@ -57,9 +57,9 @@
     (setf (browser-player-id *curr-browser-player*) (getf args :id 2))
     browser-player))
 
-#|(defun coords (x y)
-  (cl-orgelctl::coords x y))
-|#
+(defun coords (x y)
+  (cl-orgelctl::orgelctl-coords x y))
+
 
 ;;; (aref)
 
@@ -75,7 +75,7 @@
     if (> amp ampthresh)
       collect (list (aref (ats-cuda::ats-sound-frq ats-sound) partial frame) (min 1.0d0 (* gainfac amp)))))
 
-(defun coords (x y)
+(defun orgelctl-coords (x y)
   (let* ((ats-sound (ats-cuda::browser-player-ats-sound ats-cuda::*curr-browser-player*))
          (frame (min (1- (ats-cuda::ats-sound-frames ats-sound))
                      (round (* x (1- (ats-cuda::ats-sound-frames ats-sound)))))))
@@ -132,7 +132,7 @@
                    (cm:at next #'inner next)))))
       (inner start))))
 
-(shadowing-import 'coords 'cl-orgelctl)
+;;; (shadowing-import 'coords 'cl-orgelctl)
 
 
 #|
