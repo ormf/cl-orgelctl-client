@@ -79,7 +79,7 @@
                       #(16 10 15 11 2 12 3 13 5 14 9 4 7 8 6 1)))))
   nil
   (:preset nil :routes
-           (:orgel01
+           (:all (:main (main 1)) :orgel01
             (:bias-pos (ccin 0) :bias-bw (ccin 1) :global
              ((apply-notch :bias-type
                            (bias-cos :bias-pos :bias-bw :targets

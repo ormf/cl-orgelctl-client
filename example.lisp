@@ -52,7 +52,8 @@
   (digest-route-preset
    15
    `(:preset nil
-     :routes (:orgel01
+     :routes (:all (:main (main 1))
+              :orgel01
               (:bias-pos (ccin 0) :bias-bw (ccin 1)
                :global ((apply-notch :bias-type
                                        (bias-cos :bias-pos :bias-bw :targets *global-targets*
