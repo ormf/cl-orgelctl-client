@@ -41,8 +41,6 @@
 
 (in-package :cl-orgelctl)
 
-
-
 (progn
   (set-orgel-freqs
    (mapcar (lambda (x) (* x 2))

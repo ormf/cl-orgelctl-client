@@ -62,7 +62,7 @@
 |#
 
 ;;; (aref)
-(shadowing-import 'coords 'cl-orgelctl)
+
 (export '(browser-play-papierorgel play-browser) 'ats-cuda)
 
 (in-package :cl-orgelctl)
@@ -131,6 +131,9 @@
                    (ats-cuda::coords (/ (- time start) dur) 0.0)
                    (cm:at next #'inner next)))))
       (inner start))))
+
+(shadowing-import 'coords 'cl-orgelctl)
+
 
 #|
 
