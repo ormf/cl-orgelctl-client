@@ -104,10 +104,11 @@
     (dolist (fader (ats-cuda::browser-player-last-faders browser-player))
 ;;;        (break "~a ~a ~a" fader new-faders (member fader new-faders :test #'equal))
 ;;; unless (member fader new-faders :test #'equal)
+      (unless (member fader new-faders :test #'equal)
         (destructuring-bind (target orgelidx partial) fader
           (orgel-ctl-fader
            (aref *orgel-name-lookup* orgelidx)
-           (intern (string-upcase (symbol-name target)) 'cl-orgelctl) partial 0.0d0)))
+           (intern (string-upcase (symbol-name target)) 'cl-orgelctl) partial 0.0d0))))
     (loop for fader in new-faders
           for amp in new-amps
 ;;;        (break "~a ~a ~a" fader new-faders (member fader new-faders :test #'equal))
