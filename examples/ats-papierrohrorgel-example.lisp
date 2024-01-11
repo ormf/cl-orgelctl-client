@@ -18,17 +18,23 @@
 ;;;
 ;;; **********************************************************************
 
+;;; wenn der orgel-server bereits gestartet ist:
+
+(ql:quickload "cl-orgelctl-client")
+
+(connect-to-server)
+
 (in-package :ats-cuda)
 
 
 ;;; analyse a soundfile:
 
-(defparameter village01 nil)
+(defparameter *village01* nil)
 ;;; (defparameter village02a nil)
 ;;; (defparameter village02b nil)
 
 (tracker (asdf:system-relative-pathname :cl-orgelctl-client "snd/village01.wav")
-           'village01
+           '*village01*
            :start 0.0
            :hop-size 1/4
            :lowest-frequency 100.0
@@ -43,6 +49,8 @@
            :debug nil)
 
 (in-package :cl-orgelctl)
+
+;;; Den ats-player starten (ats-cuda:browser-play-papierorge ats-cuda::village01:
 
 (progn
   (set-orgel-freqs
@@ -61,40 +69,15 @@
                                                  :levels *global-amps*))
                           *global-targets*)))))
   (orgel-ctl :orgel01 :bias-bw 1)
-  (ats-cuda:browser-play-papierorgel ats-cuda::village01)
+  (ats-cuda:browser-play-papierorgel ats-cuda::*village01*)
   (play-browser 4))
 
-(ou:differentiate (mapcar #'second *orgel-freqs*))
-(copy-orgel-preset *curr-state* (aref *orgel-presets* 1))
-(save-orgel-presets)
-
-(cd (asdf:system-relative-pathname :cl-orgelctl ""))
+;;; Im Browser die Datei
+;;; ~/quicklisp/local-projects/cl-orgelctl-client/html/ats-display.html
+;;; öffnen, um die Datei zu sehen und mit der Maus zu spielen.
 
 ;;; play currently loaded ats-sound in 4 seconds
 
-(mapcar #'wellenlaenge *base-freqs*)
-
-
 (play-browser 4)
-
-(ats-cuda::coords)
-
-(orgel-ctl-fader)
-
-(cm:events
- (loop for base-freq in *base-freqs*
-       for time from 0 by 0.1
-       for i from 1
-       append (loop for p from 1 to 16 collect (cm:new cm:midi :time time :keynum (ou:ftom (* base-freq p)) :duration 1 :channel i)))
- "/tmp/freqs.svg")
-
-
-
-(cm:cd (asdf:system-relative-pathname :cl-orgelctl ""))
-(save-orgel-presets (asdf:system-relative-pathname :cl-orgelctl "presets/orgel-presets.lisp"))
-
-(load-orgel-presets (asdf:system-relative-pathname :cl-orgelctl "presets/orgel-presets.lisp"))
-
-(copy-orgel-preset *curr-state* (aref *orgel-presets* 0))
 
 
