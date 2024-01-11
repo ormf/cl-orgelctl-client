@@ -286,7 +286,8 @@ amps, etc.)"
        (incudine:make-osc-responder
         ,stream "/client-id" "s"
         (lambda (id)
-          (incudine.util:msg :info "client-id: ~a" id)
+          (incudine.util:with-logger (:level :info)
+            (incudine.util:msg :info "connected to server, client-id: ~S" id))
           (setf *client-id* id)))
        nil)))
 
@@ -294,7 +295,7 @@ amps, etc.)"
   (%make-all-responders))
 
 
-;;; call this in the init file: (make-all-responders *oscin*)
+;;; call this in the init file: (make-all-responders)
 
 
 ;;; (incudine.osc:close *oscout*)
@@ -309,6 +310,20 @@ amps, etc.)"
 
 |#
 
+(defparameter *orgel-target-props*
+  (append
+   (apply #'append
+           (mapcar #'list *orgel-global-targets* *orgel-global-target-syms*))
+   (apply #'append
+           (mapcar #'list *orgel-fader-targets* *orgel-fader-target-syms*))))
+
+(defun target->target-sym (target)
+  (if (keywordp target)
+      (getf *orgel-target-props* target)
+      target))
+
+;;; (getf *orgel-target-props* :level)
+
 (defun orgel-ctl-fader (orgel target partial val)
   (let ((orgelidx (gethash orgel *orgeltargets*)))
     (unless orgelidx (error "Orgel \"~S\" doesn't exist" orgel))
@@ -316,13 +331,11 @@ amps, etc.)"
     (set-cell
      (aref
       (slot-value (aref *curr-state* orgelidx)
-                  (if (keywordp target)
-                      (read-from-string (format nil "~a" target))
-                      target))
+                  (target->target-sym target))
       (1- partial))
      (float val 1.0))))
 
-;;; (orgel-ctl-fader :orgel04 :level 2 0.5)
+;;; (orgel-ctl-fader :orgel04 (target->target-sym :level) 2 0.5)
 
 
 (declaim (inline target-key))

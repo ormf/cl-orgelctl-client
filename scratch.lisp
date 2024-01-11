@@ -24,7 +24,10 @@
 (setup-ref-cell-hooks)
 (setf (incudine.util::logger-level) :warn)
 (setf (incudine.util::logger-level) :info)
-()
+
+
+(slot-value (aref *curr-state* 1) (read-from-string (format nil "~a" :osc-level)))
+
 (connect-to-server :remote-host "192.168.67.22" :local-host "127.0.0.1")
 (make-all-responders)
 *curr-state*
@@ -36,6 +39,10 @@ incudine::*responders*
 *client-id*
 (incudine:rt-start)
 
+
+(connect-to-server
+ :remote-host "192.168.178.103"
+ :local-host "192.168.178.103")
 (orgel-ctl-fader :orgel01 :level 2 0.4)
 
 (intern (string-upcase (format nil "~a" :level)) 'cl-orgelctl)
@@ -44,6 +51,8 @@ incudine::*responders*
 
 (val (orgel-base-freq (aref *curr-state* 0)))
 *midi-cc-state*
+
+
 
 *midi-note-state*
 

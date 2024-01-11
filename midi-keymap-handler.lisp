@@ -205,8 +205,8 @@ end and reset the list to the result."
   (let ((pending nil))
     (lambda (st d1 d2)
       (if (keywordp st)
-          (incudine.util:msg "keymap-note-responder: ~S~%" st)
-          (incudine.util:msg "keymap-note-responder: ~S ~a ~a ~%"
+          (incudine.util:msg :info "keymap-note-responder: ~S~%" st)
+          (incudine.util:msg :info "keymap-note-responder: ~S ~a ~a ~%"
                              (cm:status->opcode st) d1 d2
                              (cm:status->channel st)))
       (case (if (numberp st) (cm:status->opcode st) st)
