@@ -152,12 +152,12 @@
         with keymap = (aref *orgel-keymaps* 5)
         for entry in *orgel-freqs*
         do (push entry (aref keymap (round (second entry)))))
+;;; channel 6: Francesco keymap mit 4 Tonhöhen pro Taste in cm:heap Selektion.
   (loop
     with keymap = (aref *orgel-keymaps* 6)
     for entry in (ou:group *orgel-freqs* 4)
     for idx from 24
-    do (setf (aref keymap idx) (cm:new cm:heap :of entry)))
-  )
+    do (setf (aref keymap idx) (cm:new cm:heap :of entry))))
 
 
 ;;; (cm:next (aref (aref *orgel-keymaps* 6) 24))
