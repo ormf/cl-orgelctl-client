@@ -93,10 +93,10 @@
         (make-array 16 :element-type 'vector
                        :initial-contents
                        (loop repeat 16 collect
-                         (make-array 128 :element-type 'list
-                                         :initial-element nil))))
+                                       (make-array 128 :element-type 'list
+                                                       :initial-element nil))))
   (loop ;;; Keynums 24->103 for organs 1-5 in organ order
-    with keymap = (aref *orgel-keymaps* 0)
+        with keymap = (aref *orgel-keymaps* 0)
         for keynum from 24 to 103
         with offset = -24
         do (setf (aref keymap keynum)
@@ -104,7 +104,7 @@
                   (find-entry (1+ (floor (+ keynum offset) 16))
                               (1+ (mod (+ keynum offset) 16))))))
   (loop ;;; Keynums 24->103 for organs 6-10 in organ order
-    with keymap = (aref *orgel-keymaps* 1) 
+        with keymap = (aref *orgel-keymaps* 1) 
         for keynum from 24 to 103
         with offset = (- 80 24)
         do (setf (aref keymap keynum)
@@ -112,14 +112,14 @@
                   (find-entry (1+ (floor (+ keynum offset) 16))
                               (1+ (mod (+ keynum offset) 16))))))  
   (loop ;;; Keynums 24->103 for organ freqs in sorted order
-    with keymap = (aref *orgel-keymaps* 2) 
+        with keymap = (aref *orgel-keymaps* 2) 
         for keynum from 24 to 103
         with offset = -24
         do (setf (aref keymap keynum)
                  (list
                   (elt *orgel-freqs* (+ keynum offset)))))
   (loop ;;; Keynums 24->103 for second part of freqs in sorted order
-    with keymap = (aref *orgel-keymaps* 3) 
+        with keymap = (aref *orgel-keymaps* 3) 
         for keynum from 24 to 103
         with offset = (- 80 24)
         do (setf (aref keymap keynum)
@@ -127,26 +127,40 @@
                   (elt *orgel-freqs* (+ keynum offset)))))  
 
   (loop ;;; one partial per key, closest partial in tempered scale.
-    with keymap = (aref *orgel-keymaps* 4) 
-    for entry across keymap
-    for keynum from 0
+        with keymap = (aref *orgel-keymaps* 4) 
+        for entry across keymap
+        for keynum from 0
         do (setf (aref keymap keynum) (list (find-orgel-partial (mtof keynum)))))
 
   (loop ;;; multiple partials per key, closest partials in tempered scale.
-    with keymap = (aref *orgel-keymaps* 5)
-    for entry in *orgel-freqs*
-    do (push entry (aref keymap (round (second entry)))))
+        with keymap = (aref *orgel-keymaps* 5)
+        for entry in *orgel-freqs*
+        do (push entry (aref keymap (round (second entry)))))
   (loop ;;; fill in gaps, push number of partials for keynums with
-        ;;; more than one partial.
-    with keymap = (aref *orgel-keymaps* 5)
-    for entry across keymap
-    for keynum from 0
-    if (null entry) ;;; fill in gaps
-      do (setf (aref keymap keynum) (list (find-orgel-partial (mtof keynum))))
-    else do (let ((len (length entry))) ;;; cons length for entries
-                                        ;;; with more than one partial
-              (if (> len 1) (setf (aref keymap keynum)
-                                  (cons len (sort entry #'< :key #'first)))))))
+;;; more than one partial.
+        with keymap = (aref *orgel-keymaps* 5)
+        for entry across keymap
+        for keynum from 0
+        if (null entry) ;;; fill in gaps
+          do (setf (aref keymap keynum) (list (find-orgel-partial (mtof keynum))))
+        else do (let ((len (length entry))) ;;; cons length for entries
+;;; with more than one partial
+                  (if (> len 1) (setf (aref keymap keynum)
+                                      (cons len (sort entry #'< :key #'first))))))
+
+  (loop ;;; multiple partials per key, closest partials in tempered scale.
+        with keymap = (aref *orgel-keymaps* 5)
+        for entry in *orgel-freqs*
+        do (push entry (aref keymap (round (second entry)))))
+  (loop
+    with keymap = (aref *orgel-keymaps* 6)
+    for entry in (ou:group *orgel-freqs* 4)
+    for idx from 24
+    do (setf (aref keymap idx) (cm:new cm:heap :of entry)))
+  )
+
+
+;;; (cm:next (aref (aref *orgel-keymaps* 6) 24))
 
 ;;; (init-orgel-keymaps)
 
@@ -174,15 +188,17 @@ than one partial is associated with keynum, the first element of the
 list at keynum is the length of the following lists to be used to
 retrieve a random element."
   (let ((entry (aref (aref *orgel-keymaps* chan) keynum)))
-    (if (numberp (first entry)) ;;; more than one list in entry
-        (case select
-          (:random (elt (cdr entry) (random (first entry))))
-          (:first (second entry))
-          (:last (first (last entry)))
-          (:closest (get-closest keynum (cdr entry))))
-        (first entry))))
+    (cond ((typep entry 'cm:heap)
+           (cm:next entry))
+          ((numberp (first entry)) ;;; more than one list in entry
+           (case select
+             (:random (elt (cdr entry) (random (first entry))))
+             (:first (second entry))
+             (:last (first (last entry)))
+             (:closest (get-closest keynum (cdr entry)))))
+          (t (first entry)))))
 
-;;; (get-keymap-entry 60 5)
+;;; (get-keymap-entry 60 6)
 
 (defmacro remove-1 (elem list &key test (from-end t))
 "destructively remove 1 occurence of elem from list, starting at the
