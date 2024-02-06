@@ -104,7 +104,7 @@
                   (find-entry (1+ (floor (+ keynum offset) 16))
                               (1+ (mod (+ keynum offset) 16))))))
   (loop ;;; Keynums 24->103 for organs 6-10 in organ order
-        with keymap = (aref *orgel-keymaps* 1) 
+        with keymap = (aref *orgel-keymaps* 1)
         for keynum from 24 to 103
         with offset = (- 80 24)
         do (setf (aref keymap keynum)
@@ -157,7 +157,13 @@
     with keymap = (aref *orgel-keymaps* 6)
     for entry in (ou:group *orgel-freqs* 4)
     for idx from 24
-    do (setf (aref keymap idx) (cm:new cm:heap :of entry))))
+    do (setf (aref keymap idx) (cm:new cm:heap :of entry)))
+;;; channel 7: Francesco keymap mit 4 Tonhöhen pro Taste als cluster
+  (loop
+    with keymap = (aref *orgel-keymaps* 7)
+    for entry in (ou:group *orgel-freqs* 4)
+    for idx from 24
+    do (setf (aref keymap idx) (cm:new cm:line :of (list entry)))))
 
 
 ;;; (cm:next (aref (aref *orgel-keymaps* 6) 24))
@@ -188,7 +194,7 @@ than one partial is associated with keynum, the first element of the
 list at keynum is the length of the following lists to be used to
 retrieve a random element."
   (let ((entry (aref (aref *orgel-keymaps* chan) keynum)))
-    (cond ((typep entry 'cm:heap)
+    (cond ((typep entry 'cm::pattern)
            (cm:next entry))
           ((numberp (first entry)) ;;; more than one list in entry
            (case select
@@ -219,7 +225,8 @@ end and reset the list to the result."
 
 (defparameter *keymap-note-responder-fn*
   (let ((pending nil))
-    (lambda (st d1 d2)
+    (lambda (&optional st d1 d2 &rest args)
+      (incudine.util:msg :info "keymap-note-responder: ~S ~a ~a ~a~%" st d1 d2 args)
       (if (keywordp st)
           (incudine.util:msg :info "keymap-note-responder: ~S~%" st)
           (incudine.util:msg :info "keymap-note-responder: ~S ~a ~a ~%"
@@ -230,26 +237,32 @@ end and reset the list to the result."
         (:note-on (let* ((chan (cm:status->channel st))
                          (val (float (/ d2 127) 1.0))
                          (entry (get-keymap-entry d1 chan)))
-                    (destructuring-bind
-                        (&optional freq keynum orgelno faderno) entry
-                      (declare (ignore freq keynum))
-                      (when orgelno
-                        (orgel-ctl-fader (orgel-name orgelno) :osc-level faderno val)
-                        (push (list* d1 entry) pending) ;;; register entry
-                        ))))
+                    (when (numberp (first entry)) (setf entry (list entry)))
+                    (push (list* d1 entry) pending)
+                    (incudine.util:msg :info "entry: ~a~%pending: ~a" entry pending)
+                    (dolist (e entry)
+                      (destructuring-bind
+                          (&optional freq keynum orgelno faderno) e
+                        (declare (ignore freq keynum))
+                        (when orgelno
+                          (orgel-ctl-fader (orgel-name orgelno) :osc-level faderno val)
+                           ;;; register entry
+                          )))))
         (:note-off
-         (incudine.util:msg "note-off: ~a ~a ~%" d1 d2)
-         (unless *sticky* (let ((entry (assoc d1 pending)))
+         (incudine.util:msg :info "note-off: ~a ~a ~%" d1 d2)
+         (unless *sticky* (let ((entry (cdr (assoc d1 pending))))
                             (when entry
-                              (orgel-ctl-fader (orgel-name (fourth entry))
-                                               :osc-level (fifth entry) 0.0)
-                              (remove-1 entry pending) ;;; unregister entry
+                              (dolist (e entry)
+                                (orgel-ctl-fader (orgel-name (third e))
+                                                 :osc-level (fourth e) 0.0)
+                                (remove-1 e pending)) ;;; unregister entry
                               ))))
         ;;; additional messages
         (:clear
          (dolist (entry pending)
-           (orgel-ctl-fader (orgel-name (fourth entry))
-                            :osc-level (fifth entry) 0.0))
+           (dolist (e entry)
+             (orgel-ctl-fader (orgel-name (third e))
+                              :osc-level (fourth e) 0.0)))
          (setf pending nil))
         (:print
          (if pending
