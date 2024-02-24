@@ -269,7 +269,7 @@ amps, etc.)"
 (defmacro %make-all-responders (&optional (stream '*oscin*))
   (let ((maxorgel (symbol-value '*orgelcount*)))
     `(progn
-       (incudine:remove-all-responders ,stream)
+       (incudine::remove-all-responders ,stream)
        (get-preset-responders ,stream)
        (define-orgel-plist-responders ,stream)
        ,@(loop
