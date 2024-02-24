@@ -80,7 +80,7 @@
 
 (defun stop-osc-midi-receive (&optional local-midi-in)
   (declare (ignore local-midi-in))
-   (incudine:recv-stop *osc-midi-in*))
+   (incudine::recv-stop *osc-midi-in*))
 
 (defun osc-midi-broadcast (st d1 d2)
   (dolist (connection *midictl-osc-remote-connections*)
