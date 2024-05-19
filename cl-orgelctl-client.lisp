@@ -4,15 +4,6 @@
 
 (setf *debug* nil)
 
-(defun ndb-slider->amp (ndb &key (min -40) (max 0))
-  (if (zerop ndb)
-      0
-      (ou:db->amp (n-lin ndb min max))))
-
-(defun amp->ndb-slider (amp &key (min -40) (max 0))
-  (if (zerop amp)
-      0
-      (ou:lin-n (ou:amp->db amp) min max)))
 ;;(cm:cd "/home/orm/work/programmieren/lisp/cl-orgelctl-remote")
 (uiop:chdir (asdf:system-relative-pathname :cl-orgelctl-client ""))
 
