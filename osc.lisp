@@ -156,7 +156,7 @@ bp, gain, osc-level)."
   `(list ,target
          (let ((target-sym ',(read-from-string (format nil "~a" (symbol-value target)))))
            (declare (ignorable target-sym))
-           (incudine::make-osc-responder
+           (incudine:make-osc-responder
             ,stream ,(format nil "/orgel~2,'0d/~a" (1+ orgelidx) (symbol-value target)) "ff"
             (lambda (faderno value)
               (set-cell (aref (slot-value (aref *curr-state* ,orgelidx) target-sym) (round (1- (round faderno)))) value :src "osc")
@@ -172,7 +172,7 @@ bp, gain, osc-level)."
 amps, etc.)"
   `(list ,target
          (let ((target-sym ',(read-from-string (format nil "~a" (symbol-value target)))))
-           (incudine::make-osc-responder
+           (incudine:make-osc-responder
             ,stream ,(format nil "/orgel~2,'0d/~a" (1+ orgelidx) (symbol-value target)) "f"
             (lambda (value)
               (set-cell (slot-value (aref *curr-state* ,orgelidx) target-sym) value :src "osc")
@@ -192,7 +192,7 @@ amps, etc.)"
 (defmacro define-orgel-level-meter-responder (stream orgelidx)
   "responder for the 16 output level meters."
   `(list :mlevel
-         (incudine::make-osc-responder
+         (incudine:make-osc-responder
           ,stream ,(format nil "/orgel~2,'0d/~a" (1+ orgelidx) 'mlevel) "ff"
           (lambda (faderno value)
             (let ((f-idx (round (1- faderno))))
@@ -213,7 +213,7 @@ amps, etc.)"
 (defmacro define-orgel-ccin-responder (stream)
   "responder for external ccin."
   `(list :ccin
-         (incudine::make-osc-responder
+         (incudine:make-osc-responder
           ,stream "/ccin"  "fff"
           (lambda (ccval ccnum channel)
             (setf (val (aref (aref *midi-cc-state* (round channel)) (round ccnum))) (round ccval))
@@ -222,7 +222,7 @@ amps, etc.)"
 (defmacro define-orgel-notein-responder (stream)
   "responder for external notein."
   `(list :notein
-         (incudine::make-osc-responder
+         (incudine:make-osc-responder
           ,stream "/notein"  "fff"
           (lambda (keynum velo channel)
             (setf (val (aref (aref *midi-note-state* (round channel)) (round keynum))) (round velo))
@@ -269,7 +269,7 @@ amps, etc.)"
 (defmacro %make-all-responders (&optional (stream '*oscin*))
   (let ((maxorgel (symbol-value '*orgelcount*)))
     `(progn
-       (incudine::remove-all-responders ,stream)
+       (incudine:remove-all-responders ,stream)
        (get-preset-responders ,stream)
        (define-orgel-plist-responders ,stream)
        ,@(loop

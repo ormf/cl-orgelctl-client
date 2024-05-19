@@ -202,7 +202,7 @@ curr-preset.lisp buffer."
        `(save-excursion
          (switch-to-buffer (get-buffer "curr-preset.lisp"))) t)))
 
-(define-elisp-code)
+;;; (define-elisp-code)
 
 (defparameter *curr-orgel-preset-nr* 0)
 (defparameter *max-orgel-preset-nr* 127)

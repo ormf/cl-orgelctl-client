@@ -6,8 +6,7 @@
 (asdf:defsystem #:cl-orgelctl-client
   :description "Remote Controller für HfMDK Orgelprojekt 2022-24"
   :author "Orm Finnendahl <orm.finnendahl@selma.hfmdk-frankfurt.de>"
-  :depends-on (#:incudine #:cm-all #:cellctl #:ats-cuda
-                          )
+  :depends-on (#:incudine #:cm-all #:cellctl #:ats-cuda)
   :license  "GPL 2.0 or later"
   :version "0.0.1"
   :serial t
