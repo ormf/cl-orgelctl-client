@@ -77,22 +77,18 @@ let ((orgel-bias (bias-pos (1+ (gethash orgel *orgeltargets*)))))set-fader;;;
         (dotimes (fader 16)
           (orgel-ctl-fader orgel-nr target (1+ fader) 0.0))))))
 
-(defun set-faders (orgel target fn)
-  "set all faders of <target> at orgel <orgelno> to the values
-determined by fn, called on all partials."
-  (loop
-    for fader from 1 to 16
-    for x from 0 by 1/15
-    do (orgel-ctl-fader orgel target fader (funcall fn x))))
-
-(defun set-all-faders (&optional target orgeln fn)
+(defun set-faders (&optional orgel target fn)
   "set all faders of <target> at orgel <orgelno> to the values
 determined by fn, called on all partials with normalized x."
   (let ((targets (cond ((keywordp target) (list target))
                        ((null target) *orgel-fader-targets*)
-                       (t target))))
+                       (t target)))
+        (orgeln (cond ((keywordp orgel) (list orgel)
+                       (numberp orgel) (list orgel))
+                       ((null orgel) '(1 2 3 4 5 6 7 8))
+                       (t orgel))))
     (dolist (target targets)
-      (dolist (orgel-nr (or orgeln (range 1 (1+ *orgelcount*))))
+      (dolist (orgel-nr orgeln)
         (loop
           for fader from 1 to 16
           for x from 0 by 1/15
