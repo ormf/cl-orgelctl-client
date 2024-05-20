@@ -295,21 +295,6 @@ amps, etc.)"
   (%make-all-responders))
 
 
-;;; call this in the init file: (make-all-responders)
-
-
-;;; (incudine.osc:close *oscout*)
-;;; (incudine.osc:close *oscin*)
-
-#|
-(defun orgel-ctl-fader (orgel target idx val)
-  (unless (gethash orgel *orgeltargets*) (error "Orgel \"~S\" doesn't exist" orgel))
-;;;  (break "orgel: ~a ~a ~a ~a" orgel target idx val)
-  (incudine.osc:message *oscout* (format nil "/~a/~a" orgel target) "if" (round idx) (float val 1.0)))
-
-
-|#
-
 (defparameter *orgel-target-props*
   (append
    (apply #'append
@@ -322,7 +307,7 @@ amps, etc.)"
       (getf *orgel-target-props* target)
       target))
 
-;;; (getf *orgel-target-props* :level)
+(getf *orgel-target-props* :level)
 
 (defun orgel-ctl-fader (orgel target partial val)
   (let ((orgelidx (gethash orgel *orgeltargets*)))
