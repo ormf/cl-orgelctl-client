@@ -46,7 +46,7 @@
             :bw (getf args :bw 40000)
             :soundpos (getf args :soundpos 0)
             :mousefreq (* (max 0.0 (min (getf args :y 0) 1.0)) maxfreq))))
-    (ats->svg ats-snd :brightness (getf args :brightness 20))
+    (ats->svg ats-snd :brightness (getf args :brightness 20) :fname "/tmp/ats.svg")
     (broadcast-message "reload")
     (if *curr-browser-player* (free (browser-player-id *curr-browser-player*)))
     (setf *curr-browser-player* browser-player)
