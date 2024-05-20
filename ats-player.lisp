@@ -75,14 +75,14 @@
     if (> amp ampthresh)
       collect (list (aref (ats-cuda::ats-sound-frq ats-sound) partial frame) (min 1.0d0 (* gainfac amp)))))
 
-(defun orgelctl-coords (x y)
+(defun orgelctl-coords (x y &key (fader 'osc-level))
   (let* ((ats-sound (ats-cuda::browser-player-ats-sound ats-cuda::*curr-browser-player*))
          (frame (min (1- (ats-cuda::ats-sound-frames ats-sound))
                      (round (* x (1- (ats-cuda::ats-sound-frames ats-sound)))))))
     (if (/= frame (ats-cuda::browser-player-last-frame ats-cuda::*curr-browser-player*))
         (let ((fader-amps (find-orgel-fader-amps
                            (get-freq-amps frame ats-sound :gainfac 8)
-                           :fader 'osc-level)))
+                           :fader fader)))
           (setf (ats-cuda::browser-player-last-frame ats-cuda::*curr-browser-player*) frame)
 ;;;          (format t "~&faders: ~a~%" (first fader-amps))
           (if (member 0 (mapcar #'third (first fader-amps)))
@@ -122,13 +122,13 @@
       
       (setf (ats-cuda::browser-player-last-faders browser-player) new-faders)))
 
-(defun play-browser (dur)
+(defun play-browser (dur &key (fader 'osc-level))
   (let* ((start (cm:now))
          (end (+ start dur)))
     (labels ((inner (time)
                (when (< time end)
                  (let ((next (+ time 0.05)))
-                   (ats-cuda::coords (/ (- time start) dur) 0.0)
+                   (orgelctl-coords (/ (- time start) dur) 0.0 :fader fader)
                    (cm:at next #'inner next)))))
       (inner start))))
 

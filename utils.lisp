@@ -1,4 +1,4 @@
-;;; 
+let ((orgel-bias (bias-pos (1+ (gethash orgel *orgeltargets*)))))set-fader;;; 
 ;;; utils.lisp
 ;;;
 ;;; **********************************************************************
@@ -19,6 +19,16 @@
 ;;; **********************************************************************
 
 (in-package :cl-orgelctl)
+
+(defun ndb-slider->amp (ndb &key (min -20) (max 0))
+  (if (zerop ndb)
+      0
+      (ou:db->amp (n-lin ndb min max))))
+
+(defun amp->ndb-slider (amp &key (min -20) (max 0))
+  (if (zerop amp)
+      0
+      (ou:lin-n (ou:amp->db amp) min max)))
 
 (defun my-make-symbol (string)
   "will return a symbol without the leading hash as the common-lisp function does."
@@ -70,11 +80,23 @@
 (defun set-faders (orgel target fn)
   "set all faders of <target> at orgel <orgelno> to the values
 determined by fn, called on all partials."
-  (let ((orgel-bias (bias-pos (1+ (gethash orgel *orgeltargets*)))))
-    (loop
-      for fader from 1 to 16
-      for x from 0 by 1/15
-      do (orgel-ctl-fader orgel target fader (funcall fn x)))))
+  (loop
+    for fader from 1 to 16
+    for x from 0 by 1/15
+    do (orgel-ctl-fader orgel target fader (funcall fn x))))
+
+(defun set-all-faders (&optional target orgeln fn)
+  "set all faders of <target> at orgel <orgelno> to the values
+determined by fn, called on all partials with normalized x."
+  (let ((targets (cond ((keywordp target) (list target))
+                       ((null target) *orgel-fader-targets*)
+                       (t target))))
+    (dolist (target targets)
+      (dolist (orgel-nr (or orgeln (range 1 (1+ *orgelcount*))))
+        (loop
+          for fader from 1 to 16
+          for x from 0 by 1/15
+          do (orgel-ctl-fader orgel-nr target fader (funcall fn x)))))))
 
 (defun set-global-faders (targets fn)
   "set faders of <targets> to the values determined by fn, called on all
@@ -192,6 +214,26 @@ faders are interpolated between the faders at bw 15/15.5 and 1."
                         (cos
                          (clip (/ (* pi 1/2 (- x bias-pos)) real-bw)
                                (* -1 pi) pi))))))))))
+
+(defun bias-cos-db (bias-pos bw &key targets (levels #(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)))
+  "return a function which calculates the bias level for a slider
+[1-(length targets)] with given center freq and bw. bias-pos and bw
+are normalized. bw is the distance between the bias-pos and the -6 dB
+points left/right of the bias-pos. At 15/15.5<bw<1 the values of the
+faders are interpolated between the faders at bw 15/15.5 and 1."
+  (let* ((num-faders (if targets (length targets) 16))
+         (real-bw (n-recalc-bw bw num-faders))
+         (fader-interp (calc-bw-interp real-bw (/ (1- num-faders) num-faders))))
+    (lambda (x) (ndb-slider->amp
+            (* (aref levels (round (n-lin x 0 (1- num-faders))))
+               (+ fader-interp
+                  (* (- 1 fader-interp)
+                     (+
+                      0.5
+                      (* 0.5
+                         (cos
+                          (clip (/ (* pi 1/2 (- x bias-pos)) real-bw)
+                                (* -1 pi) pi)))))))))))
 
 (defun bias-wippe (bias-pos bw &key targets (levels #(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)))
   (lambda (n-x) (let* ((num-targets (if targets (length targets) 16))
@@ -321,6 +363,7 @@ element gets nil padded at the end."
                  do (orgel-ctl-fader orgeltarget 'osc-level partial 0.0))))
 
 (defun set-orgel-freqs (base-freqs preset-no)
+  (declare (ignorable preset-no))
   (setf *base-freqs* base-freqs)
   (setf *orgel-freqs*
         (sort
