@@ -72,7 +72,7 @@
 (defun keys-panic ()
   (dotimes (orgel 10)
     (dotimes (key 16)
-      (orgel-ctl-fader (orgel-name (1+ orgel)) :osc-level (1+ key) 0.0))))
+      (orgel-ctl-fader (orgel-name (1+ orgel)) :level (1+ key) 0.0))))
 
 (defun init-orgel-keymaps ()
   "setup of different keymaps, each using a different midi channel:
@@ -245,7 +245,7 @@ end and reset the list to the result."
                           (&optional freq keynum orgelno faderno) e
                         (declare (ignore freq keynum))
                         (when orgelno
-                          (orgel-ctl-fader (orgel-name orgelno) :osc-level faderno val)
+                          (orgel-ctl-fader (orgel-name orgelno) :level faderno val)
                            ;;; register entry
                           )))))
         (:note-off
@@ -254,7 +254,7 @@ end and reset the list to the result."
                             (when entry
                               (dolist (e entry)
                                 (orgel-ctl-fader (orgel-name (third e))
-                                                 :osc-level (fourth e) 0.0)
+                                                 :level (fourth e) 0.0)
                                 (remove-1 e pending)) ;;; unregister entry
                               ))))
         ;;; additional messages
@@ -262,7 +262,7 @@ end and reset the list to the result."
          (dolist (entry pending)
            (dolist (e entry)
              (orgel-ctl-fader (orgel-name (third e))
-                              :osc-level (fourth e) 0.0)))
+                              :level (fourth e) 0.0)))
          (setf pending nil))
         (:print
          (if pending
