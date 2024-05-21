@@ -51,7 +51,7 @@
 
 #|
 (dotimes (idx *orgelcount*)
-  (make-responders idx))
+  (make-c(make-all-responders)responders idx))
 
 (let ((test (make-orgel)))
   (slot-value test 'ramp-up))

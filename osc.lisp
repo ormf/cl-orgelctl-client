@@ -201,15 +201,6 @@ amps, etc.)"
 
 ;;; (define-orgel-level-meter-responder *oscin* 0 :mlevel)
 
-(defmacro define-preset-responder (stream path fn)
-  `(incudine:make-osc-responder
-    ,stream
-    ,(format nil "/preset-ctl/~a" path)
-    ""
-    (lambda ()
-      ,fn
-      (incudine.util:msg :info "preset-ctl: ~a~%" ,path))))
-
 (defmacro define-orgel-ccin-responder (stream)
   "responder for external ccin."
   `(list :ccin
@@ -228,6 +219,15 @@ amps, etc.)"
             (setf (val (aref (aref *midi-note-state* (round channel)) (round keynum))) (round velo))
             (incudine.util:msg :info "notein: ~a ~a ~a~%" keynum velo channel)))))
 
+(defmacro define-preset-responder (stream path fn)
+  `(incudine:make-osc-responder
+    ,stream
+    ,(format nil "/preset-ctl/~a" path)
+    ""
+    (lambda ()
+      ,fn
+      (incudine.util:msg :info "preset-ctl: ~a~%" ,path))))
+
 (defmacro get-preset-responders (stream)
   `(progn
      (define-preset-responder ,stream "prev-preset" '(previous-orgel-preset))
@@ -245,9 +245,9 @@ amps, etc.)"
 
 ;; (get-preset-responders *oscin*)
 
-(defun define-orgel-plist-responders (stream)
-;;;  (incudine.util:msg :info "defining plist responders on ~a." stream)
+(defmacro define-orgel-plist-responders (stream)
   `(let ((curr-plist nil) (trigger nil))
+     (incudine.util:msg :info "defining plist responders on ~a." ,stream)
      (incudine:make-osc-responder
       ,stream "/plist-ctl/start" ""
       (lambda ()
@@ -266,12 +266,37 @@ amps, etc.)"
         (push (list (my-make-symbol (string-upcase target)) (round orgelno) (round partial) value) curr-plist)
         (incudine.util:msg :info "plist-ctl/fader: ~a" (list (my-make-symbol (string-upcase target)) (round orgelno) (round partial) value) curr-plist orgelno partial value)))))
 
+(defmacro define-orgel-flist-responders (stream)
+  `(let ((curr-flist nil)
+         (process-flist-fn (make-process-flist-fn)))
+     (incudine.util:msg :info "defining flist responders on ~a." ,stream)
+     (incudine:make-osc-responder
+      ,stream "/flist-ctl/start" ""
+      (lambda ()
+        (setf curr-flist nil)
+        (incudine.util:msg :info "flist-ctl: start")))
+     (incudine:make-osc-responder
+      ,stream "/flist-ctl/stop" ""
+      (lambda ()
+        (incudine.util:msg :info "flist: ~a" curr-flist)
+        (funcall process-flist-fn (reverse curr-flist))
+        (setf curr-flist nil)
+        (incudine.util:msg :info "flist-ctl: stop~%")))
+     (incudine:make-osc-responder
+      ,stream "/flist-ctl/freq-amp" "ff"
+      (lambda (freq amp)
+        (push (list freq amp) curr-flist)
+        (incudine.util:msg :info "flist-ctl/freq-amp: ~a" curr-flist)))))
+
 (defmacro %make-all-responders (&optional (stream '*oscin*))
   (let ((maxorgel (symbol-value '*orgelcount*)))
     `(progn
        (incudine:remove-all-responders ,stream)
+       (incudine.util:with-logger (:level :info)
+         (incudine.util:msg :info "making osc-responders"))
        (get-preset-responders ,stream)
        (define-orgel-plist-responders ,stream)
+       (define-orgel-flist-responders ,stream)
        ,@(loop
            for orgelidx below maxorgel
            collect `(setf (gethash ,(ou:make-keyword (format nil "orgel~2,'0d" (1+ orgelidx))) *orgel-osc-responder*)
@@ -294,6 +319,7 @@ amps, etc.)"
 (defun make-all-responders ()
   (%make-all-responders))
 
+;;; (make-all-responders)
 
 (defparameter *orgel-target-props*
   (append

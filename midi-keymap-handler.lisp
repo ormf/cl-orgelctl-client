@@ -103,9 +103,9 @@
                  (list
                   (find-entry (1+ (floor (+ keynum offset) 16))
                               (1+ (mod (+ keynum offset) 16))))))
-  (loop ;;; Keynums 24->103 for organs 6-10 in organ order
+  (loop ;;; Keynums 24->71 for organs 6-8 in organ order
         with keymap = (aref *orgel-keymaps* 1)
-        for keynum from 24 to 103
+        for keynum from 24 to 71
         with offset = (- 80 24)
         do (setf (aref keymap keynum)
                  (list
@@ -118,9 +118,9 @@
         do (setf (aref keymap keynum)
                  (list
                   (elt *orgel-freqs* (+ keynum offset)))))
-  (loop ;;; Keynums 24->103 for second part of freqs in sorted order
+  (loop ;;; Keynums 24->71 for second part of freqs in sorted order
         with keymap = (aref *orgel-keymaps* 3) 
-        for keynum from 24 to 103
+        for keynum from 24 to 71
         with offset = (- 80 24)
         do (setf (aref keymap keynum)
                  (list
@@ -131,7 +131,7 @@
         for entry across keymap
         for keynum from 0
         do (setf (aref keymap keynum) (list (find-orgel-partial (mtof keynum)))))
-
+  
   (loop ;;; multiple partials per key, closest partials in tempered scale.
         with keymap = (aref *orgel-keymaps* 5)
         for entry in *orgel-freqs*

@@ -49,9 +49,10 @@
     (osc-level (make-array 16 :initial-contents (v-collect (n 16) (make-instance 'model-slot))) :type simple-array)))
 
 (defparameter *base-freqs*
-  '(27.5 32.401794 38.49546 46.19711 56.132587 69.28748 87.30706 113.156204
-    152.76933 220.0)
+  '(220.0 188.13 160.77 137.48 117.49 100.47 85.86 73.416)
   "all base frequencies of the orgel.")
+
+;;; (mapcar #'base-freq (range 1 9))
 
 (defparameter *orgel-freqs*
   (sort
@@ -60,8 +61,8 @@
         for orgeltarget from 1
         append (loop
                  for partial from 1 to 16
-                 collect (list (* base-freq partial)
-                               (ftom (* base-freq partial))
+                 collect (list (dround (* base-freq partial))
+                               (dround (ftom (* base-freq partial)))
                                orgeltarget partial)))
       #'<
       :key #'first)
@@ -76,8 +77,8 @@ keynum, orgelno and partialno.")
       for orgeltarget from 1
       append (loop
                for partial from 1 to 16
-               collect (list (* base-freq partial)
-                             (ftom (* base-freq partial))
+               collect (list (dround (* base-freq partial))
+                             (dround (ftom (* base-freq partial)))
                              orgeltarget partial)))
     #'<
     :key #'first)

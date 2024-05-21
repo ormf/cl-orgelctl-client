@@ -1,4 +1,4 @@
-let ((orgel-bias (bias-pos (1+ (gethash orgel *orgeltargets*)))))set-fader;;; 
+;;; 
 ;;; utils.lisp
 ;;;
 ;;; **********************************************************************
@@ -275,6 +275,33 @@ not contained in new."
            (orgel-ctl-fader (orgel-name orgelno) target faderno 0)))
     (setf (symbol-value old) new)
     (if trigger (mapcar #'funcall (get-trig-fns trigger)))))
+
+;;; (equal (butlast '(1 2 4)) (butlast '(1 2 3)))
+
+#|
+(member '(3 2) '((0.2 1 3) (0.5 3 1))
+        :test (lambda (x y) (equal x (cdr y))))
+|#
+
+(defun make-process-flist-fn ()
+  "handle a (freq amp) seq"
+  (let ((old nil))
+    (lambda (seq)
+      (incudine.util:msg :info "old: ~a~%seq: ~a" old seq)
+      (let ((new (remove-duplicates
+                  (loop for (freq amp) in seq
+                        collect (cons amp (subseq (find-orgel-partial freq) 2 4)))
+                  :key #'cdr :test #'equal :from-end t)))
+        (incudine.util:msg :info "old: ~a~%new: ~a~%seq: ~a" old new seq)
+        (dolist (oldevt old) ;;; handle note-offs
+          (unless (member oldevt new
+                          :test (lambda (x y) (equal x (cdr y))))
+            (setf (level (first oldevt) (second oldevt)) 0)))
+        (dolist (newevt new)
+          (setf (level (second newevt) (third newevt)) (clip (first newevt) 0 1)))
+        (setf old (mapcar #'cdr new))))))
+
+;;; (find-orgel-partial 440)
 
 (defun get-trig-fns (expr)
   "get the functions triggered by receiving a new value of an orgel
