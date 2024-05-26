@@ -107,7 +107,10 @@ targets with the idx of the target as arg."
                            (float (funcall fn x) 1.0)))
              (3 (orgel-ctl-fader (orgel-name (second target))
                                  (first target) (third target)
-                                 (float (funcall fn x) 1.0)))))))
+                                 (float (funcall fn x) 1.0)))
+             (5 (destructuring-bind (key orgelno partial idx amp-db) target
+                  (orgel-ctl-fader orgelno key partial
+                                   (float (* amp-db (funcall fn (/ idx (length *orgel-freqs-vector*)))) 1.0))))))))
 
 (defun apply-notch (bias-type fn)
   "return a function by composing fn with an inverter of values with
@@ -233,7 +236,7 @@ faders are interpolated between the faders at bw 15/15.5 and 1."
 
 
 
-(defun bias-cos-idx-db (bias-pos bw &key targets (levels #(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)))
+(defun bias-cos-idx-db (bias-pos bw &key targets)
   "return a function which calculates the bias level for a slider
 [1-(length targets)] with given center freq and bw. bias-pos and bw
 are normalized. bw is the distance between the bias-pos and the -6 dB
@@ -243,17 +246,15 @@ faders are interpolated between the faders at bw 15/15.5 and 1."
          (real-bw (n-recalc-bw bw num-faders))
          (fader-interp (calc-bw-interp real-bw (/ (1- num-faders) num-faders))))
     (lambda (x)
-      (incudine.util:msg :warn "x: ~a" x)
       (ndb-slider->amp
-            (* (aref levels (round (n-lin x 0 (1- num-faders))))
-               (+ fader-interp
-                  (* (- 1 fader-interp)
-                     (+
-                      0.5
-                      (* 0.5
-                         (cos
-                          (clip (/ (* pi 1/2 (- x bias-pos)) real-bw)
-                                (* -1 pi) pi)))))))))))
+            (+ fader-interp
+               (* (- 1 fader-interp)
+                  (+
+                   0.5
+                   (* 0.5
+                      (cos
+                       (clip (/ (* pi 1/2 (- x bias-pos)) real-bw)
+                             (* -1 pi) pi))))))))))
 
 (defun bias-wippe (bias-pos bw &key targets (levels #(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)))
   (lambda (n-x) (let* ((num-targets (if targets (length targets) 16))

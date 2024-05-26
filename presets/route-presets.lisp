@@ -91,10 +91,9 @@
            (:all (:main (main 1)) :orgel01
             (:bias-pos (ccin 0) :bias-bw (ccin 1) :global
              ((apply-notch :bias-type
-                           (bias-cos-db :bias-pos :bias-bw :targets
-                                        *global-targets* :levels
-                                        *global-amps*))
-              *global-targets*))))
+                           (bias-cos-idx-db :bias-pos :bias-bw :targets
+                                            *global-idx-amp-targets*))
+              *global-idx-amp-targets*))))
   nil nil nil nil (:preset nil :routes (:all (:main (ccin 0)))) nil nil nil nil
   nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil
   nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil
