@@ -163,7 +163,23 @@
     with keymap = (aref *orgel-keymaps* 7)
     for entry in (ou:group *orgel-freqs* 4)
     for idx from 24
-    do (setf (aref keymap idx) (cm:new cm:line :of (list entry)))))
+    do (setf (aref keymap idx) (cm:new cm:line :of (list entry))))
+  (loop ;;; Keynums 24->103 for organ freqs in sorted order
+        with keymap = (aref *orgel-keymaps* 8) 
+        for keynum from 24 to 103
+        with offset = -24
+        do (setf (aref keymap keynum)
+                 (list
+                  (elt *orgel-freqs* (+ keynum offset)))))
+  (loop ;;; Keynums 24->71 for second part of freqs in sorted order
+        with keymap = (aref *orgel-keymaps* 9) 
+        for keynum from 24 to 71
+        with offset = (- 80 24)
+        do (setf (aref keymap keynum)
+                 (list
+                  (elt *orgel-freqs* (+ keynum offset)))))
+
+  )
 
 
 ;;; (cm:next (aref (aref *orgel-keymaps* 6) 24))
@@ -226,51 +242,67 @@ end and reset the list to the result."
 (defparameter *keymap-note-responder-fn*
   (let ((pending nil))
     (lambda (&optional st d1 d2 &rest args)
-      (incudine.util:msg :info "keymap-note-responder: ~S ~a ~a ~a~%" st d1 d2 args)
       (if (keywordp st)
           (incudine.util:msg :info "keymap-note-responder: ~S~%" st)
-          (incudine.util:msg :info "keymap-note-responder: ~S ~a ~a ~%"
+          (incudine.util:msg :info "keymap-note-responder: ~S ~a ~a ~a~%"
                              (cm:status->opcode st) d1 d2
                              (cm:status->channel st)))
       (case (if (numberp st) (cm:status->opcode st) st)
         ;;; Midi messages
         (:note-on (let* ((chan (cm:status->channel st))
-                         (val (float (/ d2 127) 1.0))
+                         (amp-ndb (float (/ d2 127) 1.0))
                          (entry (get-keymap-entry d1 chan)))
                     (when (numberp (first entry)) (setf entry (list entry)))
-                    (push (list* d1 entry) pending)
+                    (push (list d1 amp-ndb entry) pending)
                     (incudine.util:msg :info "entry: ~a~%pending: ~a" entry pending)
                     (dolist (e entry)
                       (destructuring-bind
                           (&optional freq keynum orgelno faderno) e
                         (declare (ignore freq keynum))
                         (when orgelno
-                          (orgel-ctl-fader (orgel-name orgelno) :level faderno val)
+                          (if (member chan '(8 9))
+                              (push `(level ,orgelno ,faderno ,(orgel-partial->idx orgelno faderno) ,amp-ndb)
+                                    *global-idx-amp-targets*)
+                              (orgel-ctl-fader (orgel-name orgelno) :level faderno amp-ndb))
                            ;;; register entry
-                          )))))
+                          )))
+                    (incudine.util:msg :info "pending: ~a" pending)))
         (:note-off
          (incudine.util:msg :info "note-off: ~a ~a ~%" d1 d2)
-         (unless *sticky* (let ((entry (cdr (assoc d1 pending))))
+         (unless *sticky* (let* ((e-pending (assoc d1 pending))
+                                 (chan (cm:status->channel st))
+                                 (entry (caddr e-pending)))
                             (when entry
+                              (incudine.util:msg :info "entry: ~a~%pending: ~a~%e-pending: ~a" entry pending e-pending)
                               (dolist (e entry)
-                                (orgel-ctl-fader (orgel-name (third e))
-                                                 :level (fourth e) 0.0)
-                                (remove-1 e pending)) ;;; unregister entry
-                              ))))
+                                (incudine.util:msg :info "e: ~a" e)
+                                (if (member chan '(8 9))
+                                    (remove-1 e *global-idx-amp-targets* :test (lambda (x y)
+                                                                         (equal (subseq x 2 4) (subseq y 1 3))))
+                                    (orgel-ctl-fader (orgel-name (third e))
+                                                     :level (fourth e) 0.0))) ;;; unregister entry
+                              (remove-1 e-pending pending :test #'equal)
+                              (incudine.util:msg :info "pending: ~a" pending)))))
         ;;; additional messages
         (:clear
-         (dolist (entry pending)
-           (dolist (e entry)
-             (orgel-ctl-fader (orgel-name (third e))
-                              :level (fourth e) 0.0)))
-         (setf pending nil))
+         (progn
+           (incudine.util:msg :info "clearing pending: ~a" pending)
+           (dolist (entry pending)
+             (incudine.util:msg :info "entry: ~a" entry)
+             (dolist (e (third entry))
+               (orgel-ctl-fader (orgel-name (third e))
+                                :level (fourth e) 0.0))))
+         (setf pending nil)
+         (if *global-idx-amp-targets* (setf *global-idx-amp-targets* nil)))
         (:print
          (if pending
-             (format t "pending: ~{~a~^, ~}~%" pending)
+             (format t "pending: ~a~%" pending)
              (format t "no pending notes~%")))))))
 
 (defun clear-keymap-responders ()
   (funcall *keymap-note-responder-fn* :clear))
+
+;;; (length *global-targets*)
 
 ;;; (clear-keymap-responders)
 
@@ -286,6 +318,7 @@ end and reset the list to the result."
 (defun start-keymap-note-responder ()
   (if *orgel-keymap-note-responder*
       (incudine::remove-responder *orgel-keymap-note-responder*))
+  (incudine.util:msg :warn "starting keymap midi note responder")
   (setf *orgel-keymap-note-responder*
         (incudine:make-responder cm:*midi-in1* *keymap-note-responder-fn*))
   :started)

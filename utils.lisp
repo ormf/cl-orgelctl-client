@@ -231,6 +231,30 @@ faders are interpolated between the faders at bw 15/15.5 and 1."
                           (clip (/ (* pi 1/2 (- x bias-pos)) real-bw)
                                 (* -1 pi) pi)))))))))))
 
+
+
+(defun bias-cos-idx-db (bias-pos bw &key targets (levels #(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)))
+  "return a function which calculates the bias level for a slider
+[1-(length targets)] with given center freq and bw. bias-pos and bw
+are normalized. bw is the distance between the bias-pos and the -6 dB
+points left/right of the bias-pos. At 15/15.5<bw<1 the values of the
+faders are interpolated between the faders at bw 15/15.5 and 1."
+  (let* ((num-faders (if targets (length *orgel-freqs-vector*) 16))
+         (real-bw (n-recalc-bw bw num-faders))
+         (fader-interp (calc-bw-interp real-bw (/ (1- num-faders) num-faders))))
+    (lambda (x)
+      (incudine.util:msg :warn "x: ~a" x)
+      (ndb-slider->amp
+            (* (aref levels (round (n-lin x 0 (1- num-faders))))
+               (+ fader-interp
+                  (* (- 1 fader-interp)
+                     (+
+                      0.5
+                      (* 0.5
+                         (cos
+                          (clip (/ (* pi 1/2 (- x bias-pos)) real-bw)
+                                (* -1 pi) pi)))))))))))
+
 (defun bias-wippe (bias-pos bw &key targets (levels #(1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)))
   (lambda (n-x) (let* ((num-targets (if targets (length targets) 16))
                   (x (1+ (round (* n-x (1- num-targets)))))
@@ -349,6 +373,12 @@ sent using orgel-ctl-fader."
         (find-orgel-partial freq)
       (declare (ignore keynum))
       (if freq (list freq (list fader orgeltarget partial) amp)))))
+
+(defun orgel-partial->idx (orgelno partial)
+  (aref *orgel-partial-idx-lookup* orgelno partial))
+
+;;; (orgel-partial->idx 7 10)
+
 
 (defun transpose (seqs &key (initial-element nil))
   "transpose seqs and return them as a list of vectors. The number of

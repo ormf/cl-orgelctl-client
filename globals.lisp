@@ -90,6 +90,13 @@ keynum, orgelno and partialno.")
 (defparameter *orgel-max-freq* (caar (last *orgel-freqs*)))
 (defparameter *orgel-min-freq* (caar *orgel-freqs*))
 
+(defparameter *orgel-partial-idx-lookup* (make-array '(9 17) :element-type 'integer))
+
+(loop for (freq midict orgelno partial) in *orgel-freqs*
+      for idx from 0
+      do (setf (aref *orgel-partial-idx-lookup* orgelno partial) idx))
+
+
 (defparameter *orgel-presets-file*
   (asdf:system-relative-pathname :cl-orgelctl-client "presets/orgel-presets.lisp"))
 
@@ -129,6 +136,7 @@ keynum, orgelno and partialno.")
 zerobased index.")
 
 (defparameter *global-targets* nil)
+(defparameter *global-idx-amp-targets* nil)
 (defparameter *global-amps* nil)
 
 ;;; setup of *orgeltargets*

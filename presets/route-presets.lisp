@@ -8,7 +8,8 @@
              (bias-cos-db :bias-pos :bias-bw))))
   (:preset nil :routes
            (:orgel01
-            (:level (apply-notch :bias-type (bias-cos-db :bias-pos :bias-bw)))))
+            (:level
+             (apply-notch :bias-type (bias-cos-db :bias-pos :bias-bw)))))
   (:preset nil :routes
            (:orgel01
             (:level (apply-notch :bias-type (bias-wippe :bias-pos :bias-bw)))))
@@ -17,13 +18,13 @@
             (:level
              (apply-notch :bias-type
                           (bias-cos-db :bias-pos :bias-bw :levels
-                                    #(0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1))))))
+                                       #(0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1))))))
   (:preset nil :routes
            (:orgel01
             (:level
              (apply-notch :bias-type
                           (bias-cos-db :bias-pos :bias-bw :levels
-                                    #(1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0))))))
+                                       #(1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0))))))
   (:preset nil :routes
            (:orgel01
             (:level
@@ -47,8 +48,8 @@
              delay
              (apply-notch :bias-type
                           (bias-cos-db :bias-pos :bias-bw :levels
-                                    #(1 0.5 1 0.5 1 0.5 1 0.5 1 0.5 1 0.5 1 0.5
-                                      1 0.5))))))
+                                       #(1 0.5 1 0.5 1 0.5 1 0.5 1 0.5 1 0.5 1
+                                         0.5 1 0.5))))))
   nil
   (:preset nil :routes
            (:all (:main (main 1)) :orgel01
@@ -83,12 +84,21 @@
             (:bias-pos (ccin 0) :bias-bw (ccin 1) :global
              ((apply-notch :bias-type
                            (bias-cos-db :bias-pos :bias-bw :targets
-                                     *global-targets* :levels *global-amps*))
+                                        *global-targets* :levels
+                                        *global-amps*))
               *global-targets*))))
-  nil nil nil nil nil (:preset nil :routes (:all (:main (ccin 0)))) nil nil nil
+  (:preset nil :routes
+           (:all (:main (main 1)) :orgel01
+            (:bias-pos (ccin 0) :bias-bw (ccin 1) :global
+             ((apply-notch :bias-type
+                           (bias-cos-db :bias-pos :bias-bw :targets
+                                        *global-targets* :levels
+                                        *global-amps*))
+              *global-targets*))))
+  nil nil nil nil (:preset nil :routes (:all (:main (ccin 0)))) nil nil nil nil
   nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil
   nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil
   nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil
   nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil
   nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil
-  nil nil nil nil nil nil nil nil))
+  nil nil nil nil nil nil nil))
