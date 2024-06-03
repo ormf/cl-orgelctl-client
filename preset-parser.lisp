@@ -30,6 +30,7 @@
 
 (defun set-preset-def-lookup ()
   "fill the *orgel-preset-def-lookup* hash."
+  (setf *orgel-preset-def-lookup* (make-hash-table))
   (dolist (target *orgel-fader-targets*)
     (setf (gethash target *orgel-preset-def-lookup*)
           `(set-faders ,target))
@@ -37,7 +38,7 @@
       (let ((fader-target (read-from-string (format nil ":~a~2,'0d" target (1+ i)))))
         (setf (gethash fader-target 
                *orgel-preset-def-lookup*)
-              `(orgel-ctl ,fader-target)))))
+              `(orgel-ctl-fader ,(read-from-string (format nil ":~a" target)) ,(1+ i))))))
   (dolist (target *orgel-global-targets*)
     (setf (gethash target *orgel-preset-def-lookup*)
           `(orgel-ctl ,target)))
