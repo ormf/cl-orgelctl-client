@@ -263,11 +263,12 @@ end and reset the list to the result."
                         (when orgelno
                           (if (member chan '(8 9))
                               (let ((idx (orgel-partial->idx orgelno faderno)))
-                                (push `(level ,orgelno ,faderno ,idx ,amp-ndb)
+                                (pushnew `(level ,orgelno ,faderno ,idx 1.0)
                                       *global-idx-amp-targets*)
                                 (let ((factor (funcall
-                                               (apply-notch (bias-type 1) (bias-cos-idx-db (bias-pos 1) (bias-bw 1) :targets t)) (/ idx 127)))))
-                                (orgel-ctl-fader (orgel-name orgelno) :level faderno amp-ndb)))
+                                               (apply-notch (bias-type 1) (bias-cos-idx-db (bias-pos 1) (bias-bw 1) :targets t)) (/ idx 127))))
+                                  (orgel-ctl-fader (orgel-name orgelno) :level faderno (* factor amp-ndb))))
+                              (orgel-ctl-fader (orgel-name orgelno) :level faderno amp-ndb))
                            ;;; register entry
                           )))
                     (incudine.util:msg :info "pending: ~a" pending)))
@@ -281,10 +282,11 @@ end and reset the list to the result."
                               (dolist (e entry)
                                 (incudine.util:msg :info "e: ~a" e)
                                 (if (member chan '(8 9))
-                                    (remove-1 e *global-idx-amp-targets* :test (lambda (x y)
-                                                                         (equal (subseq x 2 4) (subseq y 1 3))))
-                                    (orgel-ctl-fader (orgel-name (third e))
-                                                     :level (fourth e) 0.0))) ;;; unregister entry
+                                    (progn
+                                      (remove-1 e *global-idx-amp-targets* :test (lambda (x y)
+                                                                                   (equal (subseq x 2 4) (subseq y 1 3))))
+                                      (orgel-ctl-fader (orgel-name (third e)) :level (fourth e) 0.0))
+                                    (orgel-ctl-fader (orgel-name (third e)) :level (fourth e) 0.0))) ;;; unregister entry
                               (remove-1 e-pending pending :test #'equal)
                               (incudine.util:msg :info "pending: ~a" pending)))))
         ;;; additional messages

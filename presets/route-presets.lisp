@@ -10,9 +10,7 @@
            (:orgel01
             (:level
              (apply-notch :bias-type (bias-cos-db :bias-pos :bias-bw)))))
-  (:preset nil :routes
-           (:orgel01
-            (:level (apply-notch :bias-type (bias-wippe :bias-pos :bias-bw)))))
+  (:preset nil :routes (:orgel01 (:level01 (ccin 0 0))))
   (:preset nil :routes
            (:orgel01
             (:level
