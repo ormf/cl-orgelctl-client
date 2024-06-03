@@ -243,6 +243,7 @@ end and reset the list to the result."
 (defparameter *keymap-note-responder-fn*
   (let ((pending nil))
     (lambda (&optional st d1 d2 &rest args)
+      (declare (ignorable args))
       (if (keywordp st)
           (incudine.util:msg :info "keymap-note-responder: ~S~%" st)
           (incudine.util:msg :info "keymap-note-responder: ~S ~a ~a ~a~%"
@@ -254,7 +255,7 @@ end and reset the list to the result."
                          (amp-ndb (float (/ d2 127) 1.0))
                          (entry (get-keymap-entry d1 chan)))
                     (when (numberp (first entry)) (setf entry (list entry)))
-                    (push (list d1 amp-ndb entry) pending)
+                    (pushnew (list d1 1 entry) pending :test #'equal)
                     (incudine.util:msg :info "entry: ~a~%pending: ~a" entry pending)
                     (dolist (e entry)
                       (destructuring-bind
@@ -264,7 +265,7 @@ end and reset the list to the result."
                           (if (member chan '(8 9))
                               (let ((idx (orgel-partial->idx orgelno faderno)))
                                 (pushnew `(level ,orgelno ,faderno ,idx 1.0)
-                                      *global-idx-amp-targets*)
+                                      *global-idx-amp-targets* :test #'equal)
                                 (let ((factor (funcall
                                                (apply-notch (bias-type 1) (bias-cos-idx-db (bias-pos 1) (bias-bw 1) :targets t)) (/ idx 127))))
                                   (orgel-ctl-fader (orgel-name orgelno) :level faderno (* factor amp-ndb))))
@@ -308,7 +309,9 @@ end and reset the list to the result."
 (defun clear-keymap-responders ()
   (funcall *keymap-note-responder-fn* :clear))
 
-;;; (length *global-targets*)
+;;; (length *global-idx-amp-targets*)
+
+;;; (funcall *keymap-note-responder-fn* :clear)
 
 ;;; (clear-keymap-responders)
 
