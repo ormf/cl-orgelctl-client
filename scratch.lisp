@@ -25,7 +25,11 @@
 (setf (incudine.util::logger-level) :warn)
 (setf (incudine.util::logger-level) :info)
 
+(defparameter *testoscout*
+  (incudine.osc:open :host "127.0.0.1" :port 3333 :direction :output))
+(incudine.osc:message *testoscout* "/connect-client" "si" *local-host* 3333)
 
+(connect-to-server)
 (slot-value (aref *curr-state* 1) (read-from-string (format nil "~a" :osc-level)))
 
 (connect-to-server :remote-host "192.168.67.22" :local-host "127.0.0.1")

@@ -42,7 +42,7 @@
   (unless (eq (incudine:rt-status) :started)
     (error "incudine rt not running! Please start first!"))
   (incudine:at (incudine:now) #'incudine.osc:message *oscout*
-               (format nil "/connect-client") "si" local-host local-port))
+               "/connect-client" "si" local-host local-port))
 
 (defun disconnect-from-server ()
   (incudine:at (incudine:now) #'incudine.osc:message *oscout*
@@ -333,7 +333,7 @@ amps, etc.)"
       (getf *orgel-target-props* target)
       target))
 
-(getf *orgel-target-props* :level)
+;;; (getf *orgel-target-props* :level)
 
 (defun orgel-ctl-fader (orgel target partial val)
   (let ((orgelidx (gethash orgel *orgeltargets*)))

@@ -5,7 +5,7 @@
 (setf *debug* nil)
 
 ;;(cm:cd "/home/orm/work/programmieren/lisp/cl-orgelctl-remote")
-(uiop:chdir (asdf:system-relative-pathname :cl-orgelctl-client ""))
+(uiop:chdir (asdf:system-source-directory :cl-orgelctl-client))
 
 ;;; (permute)
 
@@ -30,10 +30,12 @@
 
 ;;; (start-osc-midi-receive)
 
-  (cm:midi-open-default :direction :input)
-  (cm:midi-open-default :direction :output)
-  (incudine:recv-start cm:*midi-in1*)
-  (incudine:remove-all-responders cm:*midi-in1*)
+  (unless cm:*midi-in1* (cm:midi-open-default :direction :input))
+  (unless cm:*midi-out1* (cm:midi-open-default :direction :output))
+  (let ((midi-in (if (typep cm:*midi-in1* 'cm:incudine-stream)
+                     (cm:incudine-input cm:*midi-in1*) cm:*midi-in1*)))
+    (incudine:recv-start midi-in)
+    (incudine:remove-all-responders midi-in))
   (make-orgel-cc-responder)
   (make-orgel-note-responder)
   (init-orgel-keymaps)

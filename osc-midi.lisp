@@ -53,6 +53,32 @@
 
 ;;; osc responder:
 
+(defparameter +ml-note-off-opcode+ 8)
+(defparameter +ml-note-on-opcode+ 9)
+(defparameter +ml-key-pressure-opcode+ 10)
+(defparameter +ml-control-change-opcode+ 11)
+(defparameter +ml-program-change-opcode+ 12)
+(defparameter +ml-channel-pressure-opcode+ 13)
+(defparameter +ml-pitch-bend-opcode+ 14)
+(defconstant +ml-opcode-mask+ #xf0)
+(defconstant +ml-channel-mask+ #x0f)
+
+(defparameter *ml-opcodes*
+  `((,+ml-control-change-opcode+ . :cc)
+    (,+ml-note-on-opcode+ . :note-on)
+    (,+ml-note-off-opcode+ . :note-off)
+    (,+ml-program-change-opcode+ . :pgm-change)
+    (,+ml-pitch-bend-opcode+ . :pitch-bend)
+    (,+ml-key-pressure-opcode+ . :key-pressure)
+    (,+ml-channel-pressure-opcode+ . :channel-pressure)))
+
+(defun status->opcode (st)
+  (cdr (assoc (ash (logand st +ml-opcode-mask+) -4)
+              *ml-opcodes*)))
+
+(defun status->channel (st)
+  (logand st +ml-channel-mask+))
+
 (defun start-osc-midi-receive (&key (host "127.0.0.1") (port 4711))
   "start osc on host:port and its receivers."
   (when *osc-midi-in* (incudine.osc:close *osc-midi-in*))
@@ -71,7 +97,7 @@
          (lambda (st d1 d2)
            (let ((st (round st))
                  (d1 (round d1)))
-             (incudine::msg info "orgel-osc-midi-responder: ~S ~d ~,2f ~d "  (cm:status->opcode st) d1 (float (/ d2 127) 1.0) (cm:status->channel st))
+             (incudine::msg info "orgel-osc-midi-responder: ~S ~d ~,2f ~d "  (status->opcode st) d1 (float (/ d2 127) 1.0) (status->channel st))
              (dolist (responder (gethash cm:*midi-in1* incudine::*responders*))
                (funcall (incudine::responder-function responder) st d1 d2 cm:*midi-in1*))))))
   (incudine:recv-start *osc-midi-in*))

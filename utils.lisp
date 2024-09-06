@@ -308,6 +308,33 @@ not contained in new."
         :test (lambda (x y) (equal x (cdr y))))
 |#
 
+(defparameter *flist-decay* 200)
+(defparameter *flist-decay-val* 0.99)
+
+(defun make-process-flist-fn ()
+  "handle a (freq amp) seq"
+  (let ((old nil))
+    (lambda (seq)
+      (let ((new (remove-duplicates
+                  (loop for (freq amp) in seq
+                        collect (cons (amp->ndb-slider (abs amp))
+                                      (subseq (find-orgel-partial freq) 2 4)))
+                  :key #'cdr :test #'equal :from-end t)))
+        (incudine.util:msg :warn "old: ~a~%new: ~a" old new)
+        (dolist (freq old)
+          (decf (first freq))
+          (if (zerop (first freq))
+              (setf (level (third freq) (fourth freq)) 0.0)))
+        (setf old (delete-if #'zerop old :key #'first))
+        (dolist (f old) (setf (second f) (* (second f) *flist-decay-val*)))
+        (dolist (evt new)
+          (let ((m (member evt old :test (lambda (x y) (equal (subseq x 1 3) (subseq y 2 4))))))
+            (if m (setf (first m) (cons *flist-decay* evt))
+                (push (cons *flist-decay* evt) old)))))
+      (dolist (newevt old)
+        (setf (level (third newevt) (fourth newevt)) (clip (second newevt) 0 1)))
+      old)))
+
 (defun make-process-flist-fn ()
   "handle a (freq amp) seq"
   (let ((old nil))
