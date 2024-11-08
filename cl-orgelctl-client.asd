@@ -11,6 +11,8 @@
   :version "0.0.1"
   :serial t
   :components ((:file "package")
+;;;               (:file "svg-export")
+               (:file "websocket-server")
                (:file "structs")
                (:file "globals")
                (:file "orgel-accessor-fns")
