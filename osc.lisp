@@ -348,7 +348,6 @@ amps, etc.)"
 
 ;;; (orgel-ctl-fader :orgel04 (target->target-sym :level) 2 0.5)
 
-
 (declaim (inline target-key))
 (defun target-key (target)
   (if (keywordp target) target
