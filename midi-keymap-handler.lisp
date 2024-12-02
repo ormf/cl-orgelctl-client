@@ -26,6 +26,7 @@
 ;;; shadow incudine's wrapper to make *keymap-note-responder-fn* work
 
 (defun midi-responder-wrapper (function)
+  "This function shadows incudine's function of the same name."
     (let* ((lambda-list (incudine.util::function-lambda-list function))
            (len (length lambda-list))
            (key-pos (position '&key lambda-list)))

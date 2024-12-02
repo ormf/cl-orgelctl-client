@@ -31,8 +31,8 @@
 
 ;;; (start-osc-midi-receive)
 
-  (unless cm:*midi-in1* (cm:midi-open-default :direction :input))
-  (unless cm:*midi-out1* (cm:midi-open-default :direction :output))
+  (unless cm:*midi-in1* (cm:midi-open-default :direction :input :portname "orgelclient_midi_in"))
+  (unless cm:*midi-out1* (cm:midi-open-default :direction :output  :portname "orgelclient_midi_out"))
   (let ((midi-in (if (typep cm:*midi-in1* 'cm:incudine-stream)
                      (cm:incudine-input cm:*midi-in1*) cm:*midi-in1*)))
     (incudine:recv-start midi-in)

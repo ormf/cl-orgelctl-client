@@ -50,6 +50,18 @@
 
 (in-package :cl-orgelctl)
 
+(with-open-file (out "/tmp/test.txt" :direction :output :if-exists :supersede)
+  (format out "~{~a ~}"
+          (let ((seq (append
+                      '(0 0)
+                      (loop
+                        for i from 0
+                        for cents in (mapcar (lambda (x) (round (* x 100))) (mapcar #'second *orgel-freqs*))
+                        append (list cents i))
+                      '(12700 127))))
+            (loop for x below 12700
+                  collect (round (interpl x seq))))))
+
 (progn
   (set-orgel-freqs
    (mapcar (lambda (x) (* x 2))
