@@ -18,7 +18,7 @@
 ;;;
 ;;; **********************************************************************
 
-(in-package :ats-cuda)
+(in-package :clamps)
 
 
 ;;; analyse a soundfile:
@@ -27,20 +27,26 @@
 ;;; (defparameter village02a nil)
 ;;; (defparameter village02b nil)
 
-(tracker (asdf:system-relative-pathname :cl-orgelctl-client "snd/village01.wav")
-           'village01
-           :start 0.0
-           :hop-size 1/4
-           :lowest-frequency 100.0
-           :highest-frequency 20000.0
-           :frequency-deviation 0.5
-           :lowest-magnitude (db-amp -40)
-           :SMR-continuity 0.7
-           :track-length 6
-           :min-segment-length 3
-           :residual "/tmp/village01-res.snd"
-           :verbose nil
-           :debug nil)
+(setf village01
+      (track-ats (asdf:system-relative-pathname :cl-orgelctl-client "snd/village01.wav")
+                 :start 0.0
+                 :hop-size 1/4
+                 :lowest-frequency 100.0
+                 :highest-frequency 20000.0
+                 :frequency-deviation 0.5
+                 :lowest-magnitude (db->amp -40)
+                 :SMR-continuity 0.7
+                 :track-length 6
+                 :min-segment-length 3
+                 :residual "/tmp/village01-res.snd"
+                 :verbose nil
+                 :debug nil))
+
+;; send to browser:
+
+(ats->browser village01)
+
+;; open http://localhost:54619/ats-orgel-display
 
 (in-package :cl-orgelctl)
 
@@ -57,8 +63,10 @@
               :orgel01
               (:bias-pos (ccin 0) :bias-bw (ccin 1)
                :global ((apply-notch :bias-type
-                                       (bias-cos :bias-pos :bias-bw :targets *global-targets*
-                                                 :levels *global-amps*))
+                                     (bias-cos
+                                      :bias-pos :bias-bw
+                                      :targets *global-targets*
+                                      :levels *global-amps*))
                           *global-targets*)))))
   (orgel-ctl :orgel01 :bias-bw 1)
   (ats-cuda:browser-play-papierorgel ats-cuda::village01)

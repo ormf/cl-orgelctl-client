@@ -13,7 +13,8 @@
 
 (defun start-orgelctl-client (&key (local-host "127.0.0.1")
                                 (remote-host "127.0.0.1"))
-  (ats-cuda::start-ats-cuda-server)
+;;;  (ats-cuda::start-ats-cuda-server)
+  (clamps)
   (define-elisp-code)
   (load-orgel-presets)
   (load-route-presets)
@@ -41,7 +42,8 @@
   (init-orgel-keymaps)
   (start-keymap-note-responder)
   (incudine:recv-start *oscin*)
-  (connect-to-server))
+  (connect-to-server)
+  (setf *package* (find-package :cl-orgelctl)))
 
 ;;; (init-orgel-keymaps)
 ;;; (stop-keymap-note-responder)

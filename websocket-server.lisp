@@ -79,7 +79,7 @@
 
 ;;; (hunchentoot::shutdown)
 
-;;; (clack:stop *chat-handler*) 
+;;; (clack:stop *chat-handler*)
 
 (defstruct browser-player
   (ats-sound nil)
