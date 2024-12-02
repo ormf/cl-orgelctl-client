@@ -28,4 +28,5 @@
                (:file "osc")
                (:file "osc-midi")
                (:file "ats-player")
+               (:file "svg-orgel-player")
                (:file "cl-orgelctl-client")))

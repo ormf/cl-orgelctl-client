@@ -1,5 +1,5 @@
 ;;; 
-;;; ats-player.lisp
+;;; svg-orgel-player.lisp
 ;;;
 ;;; Play Papierrohrorgel using the ats browser interface.
 ;;;
@@ -19,6 +19,23 @@
 ;;; GNU General Public License for more details.
 ;;;
 ;;; **********************************************************************
+
+(in-package :cm)
+
+(defparameter *svg-orgel-play-unwatch* nil)
+(defparameter *svg-orgel-play-toggle* (make-ref 0.0))
+
+(defun pending-notes-off ()
+  (clamps::msg :warn "stopping2")
+  (funcall cl-orgelctl::*keymap-note-responder-fn* :clear))
+
+(cl-orgelctl::all-notes-off)
+ 
+(setf (incudine::logger-level) :info)
+
+(setf cm.svgd:*stop-hooks* (list #'pending-notes-off))
+
+(pending-notes-off)
 
 (in-package :cl-orgelctl)
 
@@ -41,9 +58,13 @@
    #'<
    :key #'object-time))
 
+#|
 
 (events (import-quantize-midifile "/tmp/robin-verklärung.mid")
         (svg-gui-path "robin-verklärung.svg"))
 
 (svg->browser "robin-verklärung.svg")
+|#
+
+
 
