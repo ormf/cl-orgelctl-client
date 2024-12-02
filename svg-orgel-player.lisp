@@ -25,22 +25,14 @@
 (defparameter *svg-orgel-play-unwatch* nil)
 (defparameter *svg-orgel-play-toggle* (make-ref 0.0))
 
-(defun pending-notes-off ()
-  (clamps::msg :warn "stopping2")
+(defun pending-orgel-notes-off ()
   (funcall cl-orgelctl::*keymap-note-responder-fn* :clear))
 
-(cl-orgelctl::all-notes-off)
- 
-(setf (incudine::logger-level) :info)
-
-(setf cm.svgd:*stop-hooks* (list #'pending-notes-off))
-
-(pending-notes-off)
+(pushnew #'pending-orgel-notes-off cm.svgd:*stop-hooks*)
 
 (in-package :cl-orgelctl)
 
-
-(defun import-quantize-midifile (fname &key (quant-level 8))
+(defun import-quantize-midifile (fname &key (quant-level 8) (transposition 0))
   (sort
    (let ((seq (import-events fname)))
      (loop for track in (cdr seq)
@@ -49,7 +41,7 @@
              (map-objects (lambda (m)
                             (setf (object-time m) (/ (round (* quant-level (object-time m))) quant-level))
                             (sv m cm::channel 5)
-                            (sv+ m cm::keynum 12)
+                            (sv+ m cm::keynum transposition)
                             (sv m cm::amplitude 1.0)
                             m)
                           (subobjects track)

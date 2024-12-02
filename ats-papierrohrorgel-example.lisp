@@ -62,6 +62,16 @@
             (loop for x below 12700
                   collect (round (interpl x seq))))))
 
+
+(events (import-quantize-midifile "/tmp/robin-verklärung.mid")
+        (svg-gui-path "robin-verklärung.svg"))
+
+(import-events "/tmp/www/svg/robin-verklärung.svg")
+
+
+
+(svg->browser "robin-verklärung.svg")
+
 (progn
   (set-orgel-freqs
    (mapcar (lambda (x) (* x 2))
