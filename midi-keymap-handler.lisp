@@ -79,10 +79,10 @@
   "setup of different keymaps, each using a different midi channel:
 
   channels 0 and 1: sorted by orgel/partial, keynums 24-103.
-                    orgel 1-5 in chan 0, orgel 6-10 in chan 2.
+                    orgel 1-5 in chan 0, orgel 6-10 in chan 1.
 
   channels 2 and 3: sorted by frequency, keynums 24-103.
-                    first 80 freqs in chan 1, second 80 freqs in chan 2.
+                    first 80 freqs in chan 2, second 80 freqs in chan 3.
 
   channel 4: sorted by tempered pitch, using the closest orgelpartial
              for each keynum.

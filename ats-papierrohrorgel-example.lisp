@@ -46,6 +46,11 @@
 
 (ats->browser village01)
 
+(ats->browser (load-ats "cl.ats"))
+
+(pushnew "/home/orm/work/selmafile/orm-unterricht/24-wise/yaohung/24-11-20/throatsinging/" *ats-file-path*)
+(ats->browser (load-ats "yaohung02.ats"))
+
 ;; open http://localhost:54619/ats-orgel-display
 
 (in-package :cl-orgelctl)
@@ -61,14 +66,6 @@
                       '(12700 127))))
             (loop for x below 12700
                   collect (round (interpl x seq))))))
-
-
-(events (import-quantize-midifile "/tmp/robin-verklärung.mid")
-        (svg-gui-path "robin-verklärung.svg"))
-
-(import-events "/tmp/www/svg/robin-verklärung.svg")
-
-
 
 (svg->browser "robin-verklärung.svg")
 

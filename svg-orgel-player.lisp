@@ -52,9 +52,13 @@
 
 #|
 
-(events (import-quantize-midifile "/tmp/robin-verklärung.mid")
-        (svg-gui-path "robin-verklärung.svg"))
+(events (import-quantize-midifile "~/work/selmafile/orm-unterricht/24-sose/syntaktische-grundlagen/24-05-14/tristan-auszüge/robin-verklärung.mid" :transposition 18)
+(svg-gui-path "robin-verklärung.svg"))
 
+(events (import-quantize-midifile "~/work/selmafile/orm-unterricht/24-sose/syntaktische-grundlagen/24-05-14/tristan-auszüge/clemens-verklärung.mid" :transposition 18)
+        (svg-gui-path "clemens-verklärung.svg"))
+
+(set-val cm.svgd:timescale (* 3/2 1/32))
 (svg->browser "robin-verklärung.svg")
 |#
 

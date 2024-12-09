@@ -20,6 +20,84 @@
 
 (ql:quickload "cl-orgelctl")
 (in-package :cl-orgelctl)
+
+(setf *oscout* (incudine.osc:open :host "localhost" :port 3016 :direction :output))
+
+(incudine.osc:message *oscout* "/orgel01/level" "sff" "client1" (float 1.0 1.0) (float 0.5 1.0))
+
+
+
+(setf *orgel-partial-idx-lookup*
+      #2A((0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+          (0 10 25 39 54 68 84 94 100 108 113 117 121 123 125 126 127)
+          (0 8 21 33 46 58 73 83 90 99 105 110 115 118 120 122 124)
+          (0 6 17 28 38 49 62 72 79 89 96 102 107 111 114 116 119)
+          (0 4 14 23 32 42 52 61 67 78 86 92 98 103 106 109 112)
+          (0 3 12 19 27 35 44 51 57 66 75 81 88 93 97 101 104)
+          (0 2 9 16 22 29 37 43 48 56 63 70 77 82 87 91 95)
+          (0 1 7 13 18 24 31 36 41 47 53 59 65 71 76 80 85)
+          (0 0 5 11 15 20 26 30 34 40 45 50 55 60 64 69 74)))
+
+(aref *orgel-partial-idx-lookup* 1 2)
+
+(mapcar #'first
+        (sort
+         (loop for x in
+                     (append
+                      (remove nil (loop for i from 23 to 104 collect (first (aref (aref *orgel-keymaps* 2) i))))
+                      (remove nil (loop for i from 23 to 104 collect (first (aref (aref *orgel-keymaps* 3) i)))))
+               for n from 0
+               collect (cons n x))
+         (lambda (x y)
+           (or (< (elt x 3) (elt y 3))
+               (and (= (elt x 3) (elt y 3)) (< (elt x 4) (elt y 4)))))))
+
+(loop for x across (aref *orgel-keymaps* 5)
+      collect (first x))
+
+
+(map 'list #'first (aref *orgel-keymaps* 4))
+
+
+(format t "0 ~{~d ~}~%"
+        (map 'list
+             (lambda (entry) (apply #'aref *orgel-partial-idx-lookup* (nthcdr 2 (first entry)))) (aref *orgel-keymaps* 4)))
+
+        (map 'list
+             (lambda (entry) (mapcar (lambda (item) (apply #'aref *orgel-partial-idx-lookup* (nthcdr 2 item))) entry)) (aref *orgel-keymaps* 5))
+
+(mapcar (lambda (entries) ()))
+
+(format t
+        "~{~{~d~^ ~};~%~}"
+        (loop
+          for idx from 0
+          for entries in (mapcar (lambda (entries)
+                                   (mapcar (lambda (item)
+                                             (apply 'aref *orgel-partial-idx-lookup* (nthcdr 2 item)))
+                                           (remove-if
+                                            #'numberp
+                                            (remove-duplicates entries :test #'equal))))
+                                 (coerce (aref *orgel-keymaps* 5) 'list))
+          collect (list* idx (length entries) entries)))
+
+
+(format t "0 ~{~d ~}~%"
+)
+
+
+(coerce (aref *orgel-keymaps* 5) 'list)
+
+
+(concatenate '(vector (unsigned-byte 8))
+             (osc::encode-address "orgel01/level")
+             (cuda-usocket-osc::encode-typetag "sff")
+             (osc::encode-args (list (loop for value in '(*client1* 1.0 0.4)
+                                           collect value))))
+
+
+
+
 (incudine::remove-all-responders cm:*midi-in1*)
 (setup-ref-cell-hooks)
 (setf (incudine.util::logger-level) :warn)
@@ -1284,3 +1362,15 @@ faders are interpolated between the faders at bw 15/15.5 and 1."
 (split-str "Aber Aber  Herr Nachbar")
 
 (reduce #'+ '(1 2 3 4 5))
+
+(clamps:make-ref 0.0)
+(defun make-change-setter (ref-cell)
+  "return a setter function for ref-cell which only triggers, when the value to be set is different from the current value."
+  (lambda (val)
+    (when (not (eql (get-val ref-cell) val))
+      (set-val ref-cell val))))
+
+(defmacro set-changed (ref-cell val)
+  "only set value of ref-cell if not equal to old value."
+
+  )
