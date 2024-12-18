@@ -103,7 +103,8 @@
 
 
 #|
-(add-cc-responder 0 (lambda (val) (format t "~&Lieber Robin midi-in channel: ~d cc: ~d ~a" 5 0 val)))
+(add-cc-responder 0 (lambda (val) (format t "~&Lieber Robin midi-in channel: ~d cc: ~d ~a" 5 0 val))
+:channel 0)
 (add-cc-responder 6 (lambda (val) (format t "~&midi-in channel: ~d cc: ~d ~a" 5 1 val)))
 
 (remove-cc-responders 0)

@@ -81,6 +81,20 @@
                                  (coerce (aref *orgel-keymaps* 5) 'list))
           collect (list* idx (length entries) entries)))
 
+(defun orgel-set (target value &key orgeln partials)
+  "Set the value of the /target/ faders of every partial in /partials/ of
+every orgel in /orgeln/ to /value/. If /partials/ or /orgeln/ is not
+provided, set all."
+  (dolist (orgel (or orgeln (range 1 9)))
+    (dolist (partial (or partials (range 1 17)))
+      (orgel-ctl-fader orgel target partial value))))
+
+(orgel-set :osc-level 1 :orgeln (range 1 5) :partials (range 4 9))
+(orgel-set :osc-level 0)
+(orgel-set :osc-level 1)
+(orgel-set :level 0)
+(orgel-ctl-fader 1 :level 3 0)
+
 
 (format t "0 ~{~d ~}~%"
 )
@@ -94,7 +108,7 @@
              (cuda-usocket-osc::encode-typetag "sff")
              (osc::encode-args (list (loop for value in '(*client1* 1.0 0.4)
                                            collect value))))
-
+(start-orgelctl-client)
 
 
 
