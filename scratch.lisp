@@ -21,11 +21,94 @@
 (ql:quickload "cl-orgelctl")
 (in-package :cl-orgelctl)
 
+(start-osc-pd-in)
+(incudine:recv-start *osc-pd-in*)
+(setf (incudine.util:logger-level) :warn)
+
+
+
+;;; "Instanz" erzeugen:
+
+(setf *pd-recorder* (make-pd-recorder))
+
+;;; Bedienung:
+
+
+(funcall *pd-recorder* :start)
+(funcall *pd-recorder* :stop)
+
+(funcall *pd-recorder* :list)
+
+(defparameter *test-seq* (reverse (funcall *pd-recorder* :list)))
+
+(events
+ (loop
+   for i below 10
+   collect (new midi :time (* 0.1 i) :keynum (between 60 72) :duration 0.1))
+ (svg-gui-path "test.svg"))
+
+(events (process repeat 10 output (new midi :time (now) :keynum (between 60 72) :duration 0.1) wait 0.1)
+        (svg-gui-path "test2.svg"))
+
+(svg->browser "test2.svg")
+
+(events (rec->midi *test-seq*) (svg-gui-path "recording.svg"))
+(svg->browser "recording.svg")
+
+(defun rec->midi (recording &key (min-dur 0.1))
+  "convert a recording of orgel :level events into a midi sequence. The
+recording has to be sorted prior to calling this function."
+  (labels ((next-time (keynum rest)
+             "return the time of the next evt with /keynum/ in /rest/ or nil if none
+exists."
+               (dolist (evt rest)
+                 (if (= keynum (getf evt :keynum))
+                     (return (getf evt :time))))))
+      (loop
+        with start-time = (getf (first recording) :time)
+        for (curr . rest) on recording
+        for curr-time = (getf curr :time)
+        for next-time = (next-time (getf curr :keynum) rest)
+        do (remf curr :time)
+        if (not (zerop (getf curr :value)))
+          collect (new midi
+                    :time (float (- curr-time start-time) 1.0)
+                    :keynum (getf curr :keynum)
+                    :duration (if next-time (float (- next-time curr-time) 1.0) min-dur)
+                    :amplitude (getf curr :value)
+                    :channel 7))))
+
+
+(defun get-events (evts &key (min-dur 0.1))
+  "evts have to be sorted before calling this function."
+    (labels ((next-time (keynum rest)
+               (dolist (evt rest)
+                 (if (= keynum (getf evt :keynum))
+                     (return (getf evt :time))))))
+      (loop
+        with start-time = (getf (first evts) :time)
+        for (curr . rest) on evts
+        for curr-time = (getf curr :time)
+        for next-time = (or (next-time (getf curr :keynum) rest) (+ curr-time min-dur))
+        for time = (- curr-time start-time)
+        do (remf curr :time)
+        if (not (zerop (getf curr :value)))
+          collect (list* :time time
+                         :duration (if next-time
+                                       (- next-time curr-time)
+                                       min-dur)
+                         curr))))
+
+
+
+
+
+
 (setf *oscout* (incudine.osc:open :host "localhost" :port 3016 :direction :output))
 
 (incudine.osc:message *oscout* "/orgel01/level" "sff" "client1" (float 1.0 1.0) (float 0.5 1.0))
 
-
+;;; Berechung der Tables für pd:
 
 (setf *orgel-partial-idx-lookup*
       #2A((0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
@@ -1376,15 +1459,3 @@ faders are interpolated between the faders at bw 15/15.5 and 1."
 (split-str "Aber Aber  Herr Nachbar")
 
 (reduce #'+ '(1 2 3 4 5))
-
-(clamps:make-ref 0.0)
-(defun make-change-setter (ref-cell)
-  "return a setter function for ref-cell which only triggers, when the value to be set is different from the current value."
-  (lambda (val)
-    (when (not (eql (get-val ref-cell) val))
-      (set-val ref-cell val))))
-
-(defmacro set-changed (ref-cell val)
-  "only set value of ref-cell if not equal to old value."
-
-  )
