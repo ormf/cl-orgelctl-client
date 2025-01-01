@@ -493,6 +493,14 @@ element gets nil padded at the end."
              ("/plist-ctl/stop" "")))))
 
 
+(defun orgel-set (target value &key orgeln partials)
+  "Set the value of the /target/ faders of every partial in /partials/ of
+every orgel in /orgeln/ to /value/. If /partials/ or /orgeln/ is not
+provided, set all."
+  (dolist (orgel (or orgeln (range 1 9)))
+    (dolist (partial (or partials (range 1 17)))
+      (orgel-ctl-fader orgel target partial value))))
+
 #|
 (destructuring-bind (targets amps)
     (find-orgel-fader-amps

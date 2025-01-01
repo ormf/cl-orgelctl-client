@@ -18,42 +18,134 @@
 ;;;
 ;;; **********************************************************************
 
-(ql:quickload "cl-orgelctl")
+(ql:quickload "cl-orgelctl-client")
 (in-package :cl-orgelctl)
+
+;;; Wav->Orgel Sequencer:
+
+;;; OSC Receiver für den pd patch erstellen:
 
 (start-osc-pd-in)
 (incudine:recv-start *osc-pd-in*)
-(setf (incudine.util:logger-level) :warn)
 
-
-
-;;; "Instanz" erzeugen:
+;;; Recorder "Instanz" erzeugen (in #'make-pd-recorder wird auch der
+;;; OSC Receiver für pd definiert):
 
 (setf *pd-recorder* (make-pd-recorder))
 
+;;; Dann den pd patch papierrohrorgel-ctl-example.pd laden und
+;;; irgendein Audiosignal auf den Eingang von PD geben.
+;;;
 ;;; Bedienung:
-
 
 (funcall *pd-recorder* :start)
 (funcall *pd-recorder* :stop)
-
 (funcall *pd-recorder* :list)
 
 (defparameter *test-seq* (reverse (funcall *pd-recorder* :list)))
 
+;;; Ausgabe der Sequenz (in Jack muss MIDI out->in verbunden sein!)
+
+(events (rec->midi *test-seq*) *rts-out*)
+
+;;; Ausgabe in svg Datei:
+
+(events (rec->midi *test-seq*) (svg-gui-path "aufnahme.svg"))
+
+
+;;; Darstellung im svg Player (Aufruf im Browser über die URL
+;;; "http://localhost:54619/svg-display"):
+
+(svg->browser "aufnahme.svg")
+
+
+
+
+
+
 (events
  (loop
    for i below 10
-   collect (new midi :time (* 0.1 i) :keynum (between 60 72) :duration 0.1))
+   collect (new sfz :time (* 0.1 i) :keynum (between 60.0 72) :duration 0.1))
  (svg-gui-path "test.svg"))
+
+(sprout
+ (loop
+   for i below 100
+   collect (new sfz :time (* 0.1 i) :keynum (between 60.0 62) :amplitude -12)))
+
+(svg->browser "test.svg")
 
 (events (process repeat 10 output (new midi :time (now) :keynum (between 60 72) :duration 0.1) wait 0.1)
         (svg-gui-path "test2.svg"))
 
 (svg->browser "test2.svg")
 
+(elt  (rec->midi *test-seq*) 51)
+
+ ; => #i(midi time 0.42666668 keynum 114 duration 0.08533333 amplitude 5.021393e-4 channel 16)
+
+(format nil "~f" 1.8872836e-4)
+
+(write-event)
+
+(set-faders)
+
+(orgel-set :osc-level 0.5)
+
+;; => #i(midi time 0.42666668 keynum 114 duration 0.08533333 amplitude 5.021393e-4 channel 16)
+
+(elt (subobjects (find-object "recording-seq")) 51)
+
+;; => #i(midi time 0.42666668 keynum 114.0 duration 0.08533335 amplitude 5.021393 channel 16)
+(events
+ (rec->midi *test-seq*)
+ "/home/orm/work/selmafile/orm-unterricht/24-wise/musikinformatik/24-12-27.midi"
+ :play nil)
+
+(mapcar (lambda (x) (getf x :time))) (length *test-seq*)
+
+(subobjects (import-events "/home/orm/work/selmafile/orm-unterricht/24-wise/musikinformatik/24-12-27.midi"))
 (events (rec->midi *test-seq*) (svg-gui-path "recording.svg"))
 (svg->browser "recording.svg")
+
+(length (rec->midi *test-seq*))
+
+(defparameter *my-midi* (rec->midi *test-seq*))
+
+(+  (getf (first *test-seq*) :time) 35.530666) ; => 232.88533301798503d0
+7019
+(loop for x in *my-midi* if (> (sv x cm::duration) 0.5) collect x);  => (#i(midi time 35.530666 keynum 125 duration 3.616 amplitude 0.33220884 channel 15)
+ ; #i(midi time 41.962666 keynum 27 duration 0.85333335 amplitude 0.029446505 channel 15)
+ ; #i(midi time 46.314667 keynum 78 duration 5.7173333 amplitude 0.04103645 channel 15)
+ ; #i(midi time 53.824 keynum 59 duration 3.5306666 amplitude 0.9856047 channel 15)
+ ; #i(midi time 53.909332 keynum 124 duration 0.768 amplitude 0.10599597 channel 15)
+ ; #i(midi time 57.184 keynum 0 duration 0.5973333 amplitude 0.1404464 channel 15)
+ ; #i(midi time 64.010666 keynum 95 duration 5.888 amplitude 0.14998502 channel 15))
+
+
+(spit `(defparameter ,*test-seq*) :outfile "~/work/selmafile/orm-unterricht/24-wise/musikinformatik/24-12-27.lisp")
+
+
+(spit *test-seq* :outfile "~/work/selmafile/orm-unterricht/24-wise/musikinformatik/24-12-27.lisp")
+
+
+(length (subobjects (find-object "recording-seq")))
+
+(add-buffer)
+(format nil "~f" 1.88e-4)
+(subobjects (import-events (svg-gui-path "recording2.svg")))
+(import-events (svg-gui-path "recording.svg"))
+(import-events "/tmp/www/svg/recording.svg")
+(write-event (new midi))
+
+(svg->browser "recording.svg")
+(< 0.025)
+
+(subobjects (find-object "recording-seq"))
+(sprout (elt (subobjects (find-object "recording2-seq")) 51))
+
+(subobjects (find-object "test-seq"))
 
 (defun rec->midi (recording &key (min-dur 0.1))
   "convert a recording of orgel :level events into a midi sequence. The
@@ -98,6 +190,27 @@ exists."
                                        (- next-time curr-time)
                                        min-dur)
                          curr))))
+
+(let ((test '((:time 619.4133333333333d0 :target :level :keynum 125 :orgelno 1 :partialno 14 :value 0.21064405)
+              (:time 619.4133333333333d0 :target :level :keynum 127 :orgelno 1 :partialno 16 :value 0.090439275)
+              (:time 619.4133333333333d0 :target :level :keynum 127 :orgelno 1 :partialno 16 :value 0.049605288)
+              (:time 619.4133333333333d0 :target :level :keynum 127 :orgelno 1 :partialno 16 :value 0.036704462)
+              (:time 619.4133333333333d0 :target :level :keynum 0 :orgelno 8 :partialno 1 :value 0.03143664)
+              (:time 619.4133333333333d0 :target :level :keynum 127 :orgelno 1 :partialno 16 :value 0.018407019)
+              (:time 619.4133333333333d0 :target :level :keynum 10 :orgelno 8 :partialno 1 :value 0.03143664))))
+  (remove-duplicate-keys test))
+
+(defparameter *test*
+  '((:time 619.4133333333333d0 :target :level :keynum 125 :orgelno 1 :partialno 14 :value 0.21064405)
+    (:time 619.4133333333333d0 :target :level :keynum 127 :orgelno 1 :partialno 16 :value 0.090439275)
+    (:time 619.4133333333333d0 :target :level :keynum 127 :orgelno 1 :partialno 16 :value 0.049605288)
+    (:time 619.4133333333333d0 :target :level :keynum 127 :orgelno 1 :partialno 16 :value 0.036704462)
+    (:time 619.4133333333333d0 :target :level :keynum 0 :orgelno 8 :partialno 1 :value 0.03143664)
+    (:time 619.4133333333333d0 :target :level :keynum 127 :orgelno 1 :partialno 16 :value 0.018407019)))
+
+(remove-duplicate-keys *test*)
+
+(length (remove-duplicate-keys (subseq *test-seq* 8 40)))
 
 
 
@@ -164,17 +277,11 @@ exists."
                                  (coerce (aref *orgel-keymaps* 5) 'list))
           collect (list* idx (length entries) entries)))
 
-(defun orgel-set (target value &key orgeln partials)
-  "Set the value of the /target/ faders of every partial in /partials/ of
-every orgel in /orgeln/ to /value/. If /partials/ or /orgeln/ is not
-provided, set all."
-  (dolist (orgel (or orgeln (range 1 9)))
-    (dolist (partial (or partials (range 1 17)))
-      (orgel-ctl-fader orgel target partial value))))
+
 
 (orgel-set :osc-level 1 :orgeln (range 1 5) :partials (range 4 9))
 (orgel-set :osc-level 0)
-(orgel-set :osc-level 1)
+(orgel-set :osc-level (db->amp -6))
 (orgel-set :level 0)
 (orgel-ctl-fader 1 :level 3 0)
 

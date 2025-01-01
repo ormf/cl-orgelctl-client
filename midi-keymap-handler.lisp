@@ -180,7 +180,13 @@
                  (list
                   (elt *orgel-freqs* (+ keynum offset)))))
 
-  )
+  (loop ;;; Keynums 24->103 for organ freqs in sorted order
+        with keymap = (aref *orgel-keymaps* 15) 
+        for keynum below 128
+        with offset = 0
+        do (setf (aref keymap keynum)
+                 (list
+                  (elt *orgel-freqs* (+ keynum offset))))))
 
 
 
@@ -222,7 +228,7 @@ retrieve a random element."
              (:closest (get-closest keynum (cdr entry)))))
           (t (first entry)))))
 
-;;; (get-keymap-entry 60 6)
+;;; (get-keymap-entry 0 15)
 
 (defmacro remove-1 (elem list &key test (from-end t))
 "destructively remove 1 occurence of elem from list, starting at the
