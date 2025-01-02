@@ -63,7 +63,7 @@
 
 (sprout (import-events (svg-gui-path "aufnahme.svg")))
 
-(defparameter *orgel-keys*
+(defparameter *orgel-ch15-keys*
   (loop
     with array = (make-array 8 :initial-element nil)
     for keynum from 0
@@ -75,14 +75,14 @@
 (defun orgel-n-p (keynum orgelno)
   "Predicate checks if midi-chan 15 /keynum/ is member of orgel
 /orgelno/."
-  (member (round keynum) (aref *orgel-keys* (1- orgelno))))
+  (member (round keynum) (aref *orgel-ch15-keys* (1- orgelno))))
 
 (orgel-n-p 10 1) ; => (10 25 39 54 68 84 94 100 108 113 117 121 123 125 126 127)
 (orgel-n-p 10 2) ; => nil
 
 
 
-(member 55 '(50 55 57))
+;;; (member 55 '(50 55 57)) ; => (55 57)
 
 ;;; mit orgelno als einer Zahl:
 
@@ -92,6 +92,10 @@
 ;;; orgelno entweder eine Zahl oder eine Liste mit Zahlen:
 
 (defun filter-orgel (midi-seq orgelno)
+  "Remove all midi events from midi-seq which keynums are members of
+/orgelno/ in MIDI-channel 15 mapping. orgelno can be a number or a
+list of numbers indicating the numbers of the orgel to remove. Return
+the filtered midi-seq."
   (loop
     with seq = midi-seq
     for no in (if (numberp orgelno) (list orgelno) orgelno)
