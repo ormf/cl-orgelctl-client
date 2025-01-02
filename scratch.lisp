@@ -58,7 +58,44 @@
 
 (svg->browser "aufnahme.svg")
 
+(sprout (import-events (svg-gui-path "aufnahme.svg")))
 
+(defun filter-blah (midi-seq)
+  midi-seq)
+
+
+
+(defparameter *orgel-keys*
+  (loop
+    with array = (make-array 8 :initial-element nil)
+    for keynum from 0
+    for (freq pitch orgelno partialno) in (mapcar #'first (coerce (aref *orgel-keymaps* 15) 'list))
+    do (push keynum (aref array (1- orgelno)))
+       finally (return array)))
+
+(defun orgel-n-p (keynum n)
+  (member (round keynum) (aref *orgel-keys* (1- n))))
+
+(orgel-n-p 10 2)
+
+(member 55 '(50 55 57))
+
+
+(defun filter-orgel (midi-seq orgelno)
+  (remove-if (lambda (keynum) (orgel-n-p keynum orgelno)) midi-seq :key #'cm::midi-keynum))
+
+(events
+ (filter-orgel
+  (subobjects (import-events (svg-gui-path "aufnahme.svg")))
+  4)
+ (svg-gui-path "aufnahme-filter.svg"))
+
+(sprout
+ (filter-orgel
+  (subobjects (import-events (svg-gui-path "aufnahme.svg")))
+  4))
+
+(svg->browser "aufname-filter.svg")
 
 
 
