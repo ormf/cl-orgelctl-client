@@ -69,12 +69,18 @@
     for keynum from 0
     for (freq pitch orgelno partialno) in (mapcar #'first (coerce (aref *orgel-keymaps* 15) 'list))
     do (push keynum (aref array (1- orgelno)))
-       finally (return array)))
+    finally (return (map 'vector #'reverse array)))
+  "Array mit Listen der keynums von Midikanal 15 für jede Orgel.")
 
-(defun orgel-n-p (keynum n)
-  (member (round keynum) (aref *orgel-keys* (1- n))))
+(defun orgel-n-p (keynum orgelno)
+  "Predicate checks if midi-chan 15 /keynum/ is member of orgel
+/orgelno/."
+  (member (round keynum) (aref *orgel-keys* (1- orgelno))))
 
-(orgel-n-p 10 2)
+(orgel-n-p 10 1) ; => (10 25 39 54 68 84 94 100 108 113 117 121 123 125 126 127)
+(orgel-n-p 10 2) ; => nil
+
+
 
 (member 55 '(50 55 57))
 
