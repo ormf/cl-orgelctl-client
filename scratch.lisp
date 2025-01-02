@@ -63,11 +63,6 @@
 
 (sprout (import-events (svg-gui-path "aufnahme.svg")))
 
-(defun filter-blah (midi-seq)
-  midi-seq)
-
-
-
 (defparameter *orgel-keys*
   (loop
     with array = (make-array 8 :initial-element nil)
@@ -83,9 +78,23 @@
 
 (member 55 '(50 55 57))
 
+;;; mit orgelno als einer Zahl:
 
 (defun filter-orgel (midi-seq orgelno)
   (remove-if (lambda (keynum) (orgel-n-p keynum orgelno)) midi-seq :key #'cm::midi-keynum))
+
+;;; orgelno entweder eine Zahl oder eine Liste mit Zahlen:
+
+(defun filter-orgel (midi-seq orgelno)
+  (loop
+    with seq = midi-seq
+    for no in (if (numberp orgelno) (list orgelno) orgelno)
+    do (setf seq
+             (remove-if
+              (lambda (keynum) (orgel-n-p keynum no))
+              midi-seq
+              :key #'cm::midi-keynum))
+    finally (return seq)))
 
 (events
  (filter-orgel
