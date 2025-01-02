@@ -93,23 +93,23 @@
 
 (defun filter-orgel (midi-seq orgelno)
   "Remove all midi events from midi-seq which keynums are members of
-/orgelno/ in MIDI-channel 15 mapping. orgelno can be a number or a
-list of numbers indicating the numbers of the orgel to remove. Return
-the filtered midi-seq."
+/orgelno/ in MIDI-channel 15 mapping. orgelno can be either a number
+or a list of numbers indicating the numbers of the orgel to
+remove. Return the filtered midi-seq."
   (loop
     with seq = midi-seq
     for no in (if (numberp orgelno) (list orgelno) orgelno)
     do (setf seq
              (remove-if
               (lambda (keynum) (orgel-n-p keynum no))
-              midi-seq
+              seq
               :key #'cm::midi-keynum))
     finally (return seq)))
 
 (events
  (filter-orgel
   (subobjects (import-events (svg-gui-path "aufnahme.svg")))
-  4)
+  '(4 5 6 7))
  (svg-gui-path "aufnahme-filter.svg"))
 
 (sprout
