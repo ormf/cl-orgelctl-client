@@ -21,15 +21,17 @@
 (in-package :cl-orgelctl)
 
 (defparameter *osc-pd-in* nil)
-;;; (defparameter *osc-pd-responder* nil)
-;;; (defparameter *pd-ctl-rec* nil)
 (defparameter *pd-recorder* nil)
 
 (defun start-osc-pd-in (&key (host "127.0.0.1") (port 3020))
   "Open an OSC port for pd-ctl messages on /host/ and /port/."
-  (if *osc-pd-in* (incudine.osc:close *osc-pd-in*))
+  (when *osc-pd-in*
+    (incudine:recv-stop *osc-pd-in*)
+    (incudine.osc:close *osc-pd-in*)
+    (setf *osc-pd-in* nil))
   (setf *osc-pd-in*
-        (incudine.osc:open :host host :port port :direction :input :protocol :udp)))
+        (incudine.osc:open :host host :port port :direction :input :protocol :udp))
+  (incudine:recv-start *osc-pd-in*))
 
 (defun make-pd-recorder ()
   "Closure for a recorder of pd-ctl osc messages."

@@ -29,7 +29,7 @@
 ;;; OSC Receiver für den pd patch erstellen:
 
 (start-osc-pd-in)
-(incudine:recv-start *osc-pd-in*)
+;;; (incudine:recv-start *osc-pd-in*)
 
 ;;; Recorder "Instanz" erzeugen (in #'make-pd-recorder wird auch der
 ;;; OSC Receiver für pd definiert):
