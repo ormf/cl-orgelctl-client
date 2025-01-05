@@ -79,6 +79,7 @@
                (osc~
                 :freq (aref orgelsynth-freqs x)
                 :amp (val (aref (slot-value (aref *curr-state* orgelidx) 'cl-orgelctl::level) partialidx))
+                :master 0.01
                 :action (let ((x x))
                           (lambda (n)
                             (setf (aref orgelsynth-ids x) (node-id n))
@@ -95,13 +96,6 @@
            orgelsynth-ids)
           (:freqs
            orgelsynth-freqs))))))
-
-(dotimes (x 128)
-  (let ((orgelidx (floor x 16))
-        (partialidx (mod x 16)))
-    (setf (aref (slot-value (aref *osc-responder-registry* orgelidx) 'cl-orgelctl::level)
-                partialidx)
-          nil)))
 
 ;;; Orgelsynth Instanz erzeugen: Hinweis: Der Orgelsynth läuft erst,
 ;;; wenn er explizit mit :start gestartet wird (s.u.)!
