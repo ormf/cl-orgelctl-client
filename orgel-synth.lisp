@@ -79,7 +79,7 @@
                (osc~
                 :freq (aref orgelsynth-freqs x)
                 :amp (val (aref (slot-value (aref *curr-state* orgelidx) 'cl-orgelctl::level) partialidx))
-                :master 0.01
+                :master 0.1
                 :action (let ((x x))
                           (lambda (n)
                             (setf (aref orgelsynth-ids x) (node-id n))
