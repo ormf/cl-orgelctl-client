@@ -30,4 +30,5 @@
                (:file "ats-player")
                (:file "svg-orgel-player")
                (:file "osc-pd-ctl")
+               (:file "orgel-synth")
                (:file "cl-orgelctl-client")))
