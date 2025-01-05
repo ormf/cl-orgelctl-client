@@ -80,8 +80,12 @@
 (orgel-n-p 10 1) ; => (10 25 39 54 68 84 94 100 108 113 117 121 123 125 126 127)
 (orgel-n-p 10 2) ; => nil
 
+(defun t-or-nil (pred)
+  (and pred t))
 
 
+
+(t-or-nil 1)
 ;;; (member 55 '(50 55 57)) ; => (55 57)
 
 ;;; mit orgelno als einer Zahl:
@@ -117,10 +121,9 @@ remove. Return the filtered midi-seq."
   (subobjects (import-events (svg-gui-path "aufnahme.svg")))
   4))
 
+(obj-time (new sfz :time 0))
+
 (svg->browser "aufname-filter.svg")
-
-
-
 
 (events
  (loop
