@@ -108,12 +108,20 @@
 
 (defparameter *orgelsynth* (make-orgelsynth))
 
+(defun orgelsynth (cmd)
+  (funcall *orgelsynth* cmd))
+
 #|
 
 ;; Bedienung:
 
 (funcall *orgelsynth* :start)
 (funcall *orgelsynth* :stop)
+
+;; oder direkt mit der Funktion #'orgelsynth:
+
+(orgelsynth :start)
+(orgelsynth :stop)
 
 ;; state in der repl ausgeben:
 
