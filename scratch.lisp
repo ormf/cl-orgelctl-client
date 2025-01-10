@@ -47,14 +47,20 @@
 
 (defparameter *test-seq* (reverse (funcall *pd-recorder* :list)))
 
+(defun pd-recorder (cmd)
+  (funcall *pd-recorder* cmd))
+
+(pd-recorder :list)
+
 ;;; Ausgabe der Sequenz (in Jack muss MIDI out->in verbunden sein!)
 
-(events (rec->midi *test-seq*) *rts-out*)
+(events (rec->midi (reverse (funcall *pd-recorder* :list))) *rts-out*)
+
+(keys-panic)
 
 ;;; Ausgabe in svg Datei:
 
-(events (rec->midi *test-seq*) (svg-gui-path "aufnahme.svg"))
-
+(events (rec->midi (reverse (funcall *pd-recorder* :list))) (svg-gui-path "aufnahme.svg"))
 
 ;;; Darstellung im svg Player (Aufruf im Browser über die URL
 ;;; "http://localhost:54619/svg-display"):

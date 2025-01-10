@@ -54,10 +54,10 @@
                ;; in #'setup-ref-cell-hooks):
                (push fn (aref (slot-value (aref *osc-responder-registry* orgelidx) 'cl-orgelctl::level) partialidx))
                ;; definition of an unwatch function in cellctl
-               ;; fashion: As all fns in the list of the fader's
-               ;; slot in *osc-responder-registry* will get called
-               ;; if a value in *curr-state* is changed, we simply
-               ;; remove fn from this list.
+               ;; fashion: As all fns in the list of the fader's slot
+               ;; in *osc-responder-registry* will get called if the
+               ;; value of the fader in *curr-state* is changed, we
+               ;; simply remove fn from this list.
                (push
                 (lambda () 
                   (setf (aref (slot-value (aref *osc-responder-registry* orgelidx) 'cl-orgelctl::level) partialidx)
@@ -75,7 +75,6 @@
            (dotimes (x 128)
              (let ((orgelidx (floor x 16))
                    (partialidx (mod x 16)))
-;;;               (break "start ~a ~a" x orgelsynth-freqs)
                (osc~
                 :freq (aref orgelsynth-freqs x)
                 :amp (val (aref (slot-value (aref *curr-state* orgelidx) 'cl-orgelctl::level) partialidx))
@@ -83,8 +82,8 @@
                 :action (let ((x x))
                           (lambda (n)
                             (setf (aref orgelsynth-ids x) (node-id n))
-                            (if (= x 127)
-                                (setup-orgelsynth-watch))))
+                            (when (= x 127)
+                              (setup-orgelsynth-watch))))
                 :tail 200))))
           (:stop
            (map nil #'free orgelsynth-ids)
