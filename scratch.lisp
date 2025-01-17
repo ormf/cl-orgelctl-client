@@ -56,6 +56,15 @@
 
 (events (rec->midi (reverse (funcall *pd-recorder* :list))) *rts-out*)
 
+(events (rec->midi (reverse (funcall *pd-recorder* :list)))
+        (svg-gui-path "jonathan.svg"))
+
+(svg->browser "jonathan.svg")
+
+(sprout (new midi :time 0 :keynum 60 :channel 15))
+
+(orgel-ctl-fader)
+
 (keys-panic)
 
 ;;; Ausgabe in svg Datei:

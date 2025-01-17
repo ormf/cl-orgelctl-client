@@ -77,14 +77,15 @@
                    (partialidx (mod x 16)))
                (osc~
                 :freq (aref orgelsynth-freqs x)
-                :amp (val (aref (slot-value (aref *curr-state* orgelidx) 'cl-orgelctl::level) partialidx))
+                :amp (val (aref (slot-value (aref *curr-state* orgelidx) 'cl-orgelctl::level)
+                                partialidx))
                 :master 0.1
                 :action (let ((x x))
                           (lambda (n)
                             (setf (aref orgelsynth-ids x) (node-id n))
                             (when (= x 127)
                               (setup-orgelsynth-watch))))
-                :tail 200))))
+                :tail 100))))
           (:stop
            (map nil #'free orgelsynth-ids)
            (dotimes (i 128) (setf (aref orgelsynth-ids i) -1))
