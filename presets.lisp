@@ -82,8 +82,8 @@ interpolating all values between presets <num> and <next>."
 
 ;;; (recall-orgel 0 2)
 
-
 (defun recall-orgel-preset (num &optional next interp)
+  "recall preset /num/ of /*orgel-presets*/ into *curr-state*".
   (when num
     (loop for orgel below *orgelcount*
           for time from 0 by 0.02
@@ -97,18 +97,21 @@ interpolating all values between presets <num> and <next>."
 ;;; (recall-orgel-preset 0)
 
 (defun store-orgel-preset (num &key (presets *orgel-presets*))
+  "store *curr-state* into preset /num/ of /*orgel-presets*/".
   (let ((preset (aref presets num)))
     (dotimes (idx *orgelcount*)
       (format t "~a, " idx)
       (setf (aref preset idx) (model-orgel->val-orgel (aref *curr-state* idx) )))))
 
 (defun save-orgel-presets (&optional (file *orgel-presets-file*))
+  "save all presets from /*orgel-presets*/ to /file/."
   (with-open-file (out file :direction :output :if-exists :supersede)
     (format out "(in-package :cl-orgelctl)~%(setf *orgel-presets* ~%~a)" *orgel-presets*)))
 
-;;; (save-presets)
+;;; (save-orgel-presets)
 
 (defun load-orgel-presets (&optional (file *orgel-presets-file*))
+  "load all presets from /file/ into /*orgel-presets*/."  
   (load file))
 
 ;;; (orgel-ctl 1 :level 1 (random 128))
