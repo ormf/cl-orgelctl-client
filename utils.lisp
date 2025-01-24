@@ -20,6 +20,29 @@
 
 (in-package :cl-orgelctl)
 
+(defun key-to-sym (key)
+  (intern (format nil "~:@(~a~)" key)))
+
+(defun orgel-val (orgelno slot &optional partialno)
+  (if (member slot '(:level :osc-level :delay :q :gain))
+      (val (aref (slot-value (aref *curr-state* (1- orgelno)) (key-to-sym slot))
+		 (1- partialno)))
+      (val (slot-value (aref *curr-state* (1- orgelno)) (key-to-sym slot)))))
+
+(defun (setf orgel-val) (value orgelno slot &optional partialno)
+    (if (member slot '(:level :osc-level :delay :q :gain))
+	(setf (val (aref (slot-value (aref *curr-state* (1- orgelno)) (key-to-sym slot))
+			 (1- partialno)))
+	      value)
+	(setf (val (slot-value (aref *curr-state* (1- orgelno)) (key-to-sym slot)))
+	      value))) 
+
+;; (orgel-val 1 :base-freq)
+;;
+;; (setf (orgel-val 1 :base-freq) 231)
+;; (setf (orgel-val 1 :level 2) 0.0)
+
+
 (defun ndb-slider->amp (ndb &key (min -20) (max 0))
   (if (zerop ndb)
       0
