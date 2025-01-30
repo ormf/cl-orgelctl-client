@@ -109,13 +109,12 @@ interpolating all values between presets <num> and <next>."
     (format out "(in-package :cl-orgelctl)~%(setf *orgel-presets* ~%~a)" *orgel-presets*)))
 
 ;;; (save-orgel-presets)
-
+|#
 (defun load-orgel-presets (&optional (file *orgel-presets-file*))
   "load all presets from /file/ into /*orgel-presets*/."  
   (load file))
 
 ;;; (orgel-ctl 1 :level 1 (random 128))
-|#
 
 (defparameter *route-presets* (make-array 128 :initial-element nil :element-type 'list))
 
