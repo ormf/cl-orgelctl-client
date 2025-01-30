@@ -18,7 +18,7 @@
                (:file "orgel-accessor-fns")
                (:file "orgel-value-callbacks")
                (:file "preset-parser")
-;;;               (:file "presets")
+               (:file "presets")
                (:file "utils")
 ;;               (:file "cl-orgel-gui-redefs")
                (:file "database")

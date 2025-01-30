@@ -43,7 +43,7 @@
 
 ;;; (copy-orgel-preset *curr-state* (aref *orgel-presets* 0))
 ;;;(aref *curr-state* 1)
-
+#|
 (defun recall-orgel (orgelidx num &optional next interp)
   "recall the complete state of orgel at orgelidx from preset <num> by
 sending the values using osc. <interp> is a value between 0 and 1
@@ -115,7 +115,7 @@ interpolating all values between presets <num> and <next>."
   (load file))
 
 ;;; (orgel-ctl 1 :level 1 (random 128))
-
+|#
 
 (defparameter *route-presets* (make-array 128 :initial-element nil :element-type 'list))
 
