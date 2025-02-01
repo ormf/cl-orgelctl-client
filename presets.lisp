@@ -102,6 +102,7 @@ interpolating all values between presets <num> and <next>."
     (dotimes (idx *orgelcount*)
       (format t "~a, " idx)
       (setf (aref preset idx) (model-orgel->val-orgel (aref *curr-state* idx) )))))
+|#
 
 (defun save-orgel-presets (&optional (file *orgel-presets-file*))
   "save all presets from /*orgel-presets*/ to /file/."
@@ -109,10 +110,88 @@ interpolating all values between presets <num> and <next>."
     (format out "(in-package :cl-orgelctl)~%(setf *orgel-presets* ~%~a)" *orgel-presets*)))
 
 ;;; (save-orgel-presets)
-|#
 (defun load-orgel-presets (&optional (file *orgel-presets-file*))
   "load all presets from /file/ into /*orgel-presets*/."  
   (load file))
+
+(defun map-curr-state (result-type fn &key (orgelnos (mapcar #'1+ (range *orgelcount*)))
+                                        (targets (append *orgel-global-targets* *orgel-fader-targets*)))
+  "map fn over all slots of *curr-state*. Filter by /orgelnos/ and
+/targets/. The function is called with 3 (global targets) or 4 (fader
+targets) arguments: (slot orgelnos target &optional faderno). If
+result-type is non-nil, return the results of fn in a sequence of type
+/result-type/, similar to common lisp's #'map."
+  (let ((result nil))
+    (dolist (target targets)
+      (dolist (orgelno orgelnos)
+        (if (member target *orgel-global-targets*)
+            (if result-type
+                (push (funcall fn (slot-value (aref *curr-state* (1- orgelno)) (intern (symbol-name target))) orgelno target) result)
+                (funcall fn (slot-value (aref *curr-state* (1- orgelno)) (intern (symbol-name target))) orgelno target))
+            (dotimes (fader-idx 16)
+              (if result-type
+                  (push (funcall fn (slot-value (aref *curr-state* (1- orgelno)) (intern (symbol-name target)))
+                                 orgelno target (1+ fader-idx))
+                        result)
+                  (funcall fn (slot-value (aref *curr-state* (1- orgelno)) (intern (symbol-name target)))
+                           orgelno target (1+ fader-idx)))))))
+    (if result-type (coerce (reverse result) result-type))))
+
+;;; (map-curr-state '() (lambda (slot &rest args) (list args (setf (val slot) 0))) :targets '(:level))
+;;; (map-curr-state 'list (lambda (slot orgelidx target &optional faderidx) (list orgelidx target faderidx (setf (val slot) 0))) :targets '(:level))
+
+(defun cp-preset (srcno destno &key (orgelnos (mapcar #'1+ (range *orgelcount*)))
+                             (targets (append *orgel-global-targets* *orgel-fader-targets*)))
+  "cp the values of /targets/ of orgeln /orgelnos/ from index /srcno/ in *orgel-presets* to /destno/ of *orgel-presets*."
+  (let ((src (aref *orgel-presets* srcno))
+        (dest (aref *orgel-presets* destno)))
+    (dolist (orgelno orgelnos)
+      (dolist (target targets)
+        (if (member target *orgel-global-targets*)
+            (setf (slot-value (aref dest (1- orgelno)) (intern (symbol-name target)))
+                  (slot-value (aref src (1- orgelno)) (intern (symbol-name target))))
+            (dotimes (fader-idx 16)
+              (setf (aref (slot-value (aref dest (1- orgelno)) (intern (symbol-name target))) fader-idx)
+                    (aref (slot-value (aref src (1- orgelno)) (intern (symbol-name target))) fader-idx))))))))
+
+(defun store-preset (destno &key (orgelnos (mapcar #'1+ (range *orgelcount*)))
+                              (targets (append *orgel-global-targets* *orgel-fader-targets*)))
+  "store the values of *curr-state* into preset number /destno/ of
+*orgel-presets*. Filter by /orgelno/ and /targets/."
+  (let ((dest (aref *orgel-presets* destno)))
+    (map-curr-state
+     nil
+     (lambda (slot orgelno target &optional partial)
+       (if (member target *orgel-global-targets*)
+           (setf (slot-value (aref dest (1- orgelno)) (intern (symbol-name target)))
+                 (val slot))
+           (setf (aref (slot-value (aref dest (1- orgelno)) (intern (symbol-name target))) (1- partial))
+                 (val (aref slot (1- partial))))))
+     :orgelnos orgelnos
+     :targets targets)))
+
+;;; (store-preset 2)
+
+
+(defun recall-preset (srcno &key (orgelnos (mapcar #'1+ (range *orgelcount*)))
+                              (targets (append *orgel-global-targets* *orgel-fader-targets*)))
+  "recall the values of preset number /srcno/ of *orgel-presets* into
+*curr-state*. Filter by /orgelno/ and /targets/."
+  (let ((src (aref *orgel-presets* srcno)))
+    (map-curr-state
+     nil
+     (lambda (slot orgelno target &optional partial)
+       (if (member target *orgel-global-targets*)
+           (setf (val slot)
+                 (slot-value (aref src (1- orgelno)) (intern (symbol-name target))))
+           (setf (val (aref slot (1- partial)))
+                 (aref (slot-value (aref src (1- orgelno)) (intern (symbol-name target))) (1- partial)))))
+     :orgelnos orgelnos
+     :targets targets)))
+
+;;; (recall-preset 2)
+
+
 
 ;;; (orgel-ctl 1 :level 1 (random 128))
 
