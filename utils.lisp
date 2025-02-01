@@ -42,6 +42,30 @@
 ;; (setf (orgel-val 1 :base-freq) 231)
 ;; (setf (orgel-val 1 :level 2) 0.0)
 
+(defun map-curr-state (result-type fn &key (orgelno (mapcar #'1+ (range *orgelcount*)))
+                                        (targets (append *orgel-global-targets* *orgel-fader-targets*)))
+  "map /fn/ over all slots in /targets/ in all orgeln in /orgelno/ of
+*curr-state*. /fn/ is called with the slot of *curr-state*, its
+orgel-idx, target keyword and fader-idx (where applicable) as args. If
+/result-type/ is non-nil, the results of calling /fn/ will be returned
+as in Common Lisp's #'map function."
+  (let ((result nil))
+    (dolist (target targets)
+      (dolist (orgel orgelno)
+        (if (member target *orgel-global-targets*)
+            (if result-type
+                (push (funcall fn (slot-value (aref *curr-state* (1- orgel)) (intern (symbol-name target))) orgel target) result)
+                (funcall (funcall fn (slot-value (aref *curr-state* (1- orgel)) (intern (symbol-name target))) orgel target)))
+            (dotimes (fader-idx 16)
+              (if result-type
+                  (push (funcall fn (aref (slot-value (aref *curr-state* (1- orgel)) (intern (symbol-name target))) fader-idx)
+                                 orgel target (1+ fader-idx))
+                        result)
+                  (funcall fn (aref (slot-value (aref *curr-state* (1- orgel)) (intern (symbol-name target)))
+                                    fader-idx)
+                           orgel target (1+ fader-idx)))))))
+    (if result-type (coerce (reverse result) result-type))))
+
 
 (defun ndb-slider->amp (ndb &key (min -20) (max 0))
   (if (zerop ndb)
