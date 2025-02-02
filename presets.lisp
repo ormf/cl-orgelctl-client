@@ -126,14 +126,16 @@ result-type is non-nil, return the results of fn in a sequence of type
       (dolist (orgelno orgelnos)
         (if (member target *orgel-global-targets*)
             (if result-type
-                (push (funcall fn (slot-value (aref *curr-state* (1- orgelno)) (intern (symbol-name target))) orgelno target) result)
-                (funcall fn (slot-value (aref *curr-state* (1- orgelno)) (intern (symbol-name target))) orgelno target))
+                (push (funcall fn (slot-value (aref *curr-state* (1- orgelno)) (intern (symbol-name target) 'cl-orgelctl))
+                               orgelno target)
+                      result)
+                (funcall fn (slot-value (aref *curr-state* (1- orgelno)) (intern (symbol-name target) 'cl-orgelctl)) orgelno target))
             (dotimes (fader-idx 16)
               (if result-type
-                  (push (funcall fn (slot-value (aref *curr-state* (1- orgelno)) (intern (symbol-name target)))
+                  (push (funcall fn (slot-value (aref *curr-state* (1- orgelno)) (intern (symbol-name target) 'cl-orgelctl))
                                  orgelno target (1+ fader-idx))
                         result)
-                  (funcall fn (slot-value (aref *curr-state* (1- orgelno)) (intern (symbol-name target)))
+                  (funcall fn (slot-value (aref *curr-state* (1- orgelno)) (intern (symbol-name target) 'cl-orgelctl))
                            orgelno target (1+ fader-idx)))))))
     (if result-type (coerce (reverse result) result-type))))
 
@@ -148,11 +150,11 @@ result-type is non-nil, return the results of fn in a sequence of type
     (dolist (orgelno orgelnos)
       (dolist (target targets)
         (if (member target *orgel-global-targets*)
-            (setf (slot-value (aref dest (1- orgelno)) (intern (symbol-name target)))
-                  (slot-value (aref src (1- orgelno)) (intern (symbol-name target))))
+            (setf (slot-value (aref dest (1- orgelno)) (intern (symbol-name target) 'cl-orgelctl))
+                  (slot-value (aref src (1- orgelno)) (intern (symbol-name target) 'cl-orgelctl)))
             (dotimes (fader-idx 16)
-              (setf (aref (slot-value (aref dest (1- orgelno)) (intern (symbol-name target))) fader-idx)
-                    (aref (slot-value (aref src (1- orgelno)) (intern (symbol-name target))) fader-idx))))))))
+              (setf (aref (slot-value (aref dest (1- orgelno)) (intern (symbol-name target) 'cl-orgelctl)) fader-idx)
+                    (aref (slot-value (aref src (1- orgelno)) (intern (symbol-name target) 'cl-orgelctl)) fader-idx))))))))
 
 (defun store-preset (destno &key (orgelnos (mapcar #'1+ (range *orgelcount*)))
                               (targets (append *orgel-global-targets* *orgel-fader-targets*)))
@@ -163,9 +165,9 @@ result-type is non-nil, return the results of fn in a sequence of type
      nil
      (lambda (slot orgelno target &optional partial)
        (if (member target *orgel-global-targets*)
-           (setf (slot-value (aref dest (1- orgelno)) (intern (symbol-name target)))
+           (setf (slot-value (aref dest (1- orgelno)) (intern (symbol-name target) 'cl-orgelctl))
                  (val slot))
-           (setf (aref (slot-value (aref dest (1- orgelno)) (intern (symbol-name target))) (1- partial))
+           (setf (aref (slot-value (aref dest (1- orgelno)) (intern (symbol-name target) 'cl-orgelctl)) (1- partial))
                  (val (aref slot (1- partial))))))
      :orgelnos orgelnos
      :targets targets)))
@@ -183,9 +185,9 @@ result-type is non-nil, return the results of fn in a sequence of type
      (lambda (slot orgelno target &optional partial)
        (if (member target *orgel-global-targets*)
            (setf (val slot)
-                 (slot-value (aref src (1- orgelno)) (intern (symbol-name target))))
+                 (slot-value (aref src (1- orgelno)) (intern (symbol-name target) 'cl-orgelctl)))
            (setf (val (aref slot (1- partial)))
-                 (aref (slot-value (aref src (1- orgelno)) (intern (symbol-name target))) (1- partial)))))
+                 (aref (slot-value (aref src (1- orgelno)) (intern (symbol-name target) 'cl-orgelctl)) (1- partial)))))
      :orgelnos orgelnos
      :targets targets)))
 
