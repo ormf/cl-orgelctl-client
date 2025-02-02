@@ -26,7 +26,7 @@
    "flag for printing debugging info.")
 
 (unless (boundp '*orgelcount*)
-  (defvar *orgelcount* 10)
+  (defvar *orgelcount* 8)
   "total num of organs")
 
 (unless (fboundp 'make-orgel)

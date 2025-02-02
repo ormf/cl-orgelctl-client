@@ -12,7 +12,8 @@
 (setup-ref-cell-hooks)
 
 (defun start-orgelctl-client (&key (local-host "127.0.0.1")
-                                (remote-host "127.0.0.1"))
+                                (remote-host "127.0.0.1")
+                                (protocol :udp))
 ;;;  (ats-cuda::start-ats-cuda-server)
   (clamps)
   (define-elisp-code)
@@ -24,8 +25,8 @@
   (setf *remote-port* 3011)
   (if *oscout* (incudine.osc:close *oscout*))
   (if *oscin* (incudine.osc:close *oscin*))
-  (setf *oscout* (incudine.osc:open :port *remote-port* :host *remote-host* :direction :output :protocol :udp))
-  (setf *oscin* (incudine.osc:open :port *local-port* :host *local-host* :direction :input :protocol :udp))
+  (setf *oscout* (incudine.osc:open :port *remote-port* :host *remote-host* :direction :output :protocol protocol))
+  (setf *oscin* (incudine.osc:open :port *local-port* :host *local-host* :direction :input :protocol protocol))
   (setf (incudine.util:logger-level) :warn)
   (incudine:rt-start)
 
