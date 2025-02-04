@@ -335,6 +335,10 @@ context."
                          (setf ocpg.targets (delete :gain ocpg.targets))
                          (pushnew :gain ocpg.targets))))
         ocpg.unwatch)
+  (push (watch (lambda () (if (zerop (get-val ocpg.osc-level-btn))
+                         (setf ocpg.targets (delete :osc-level ocpg.targets))
+                         (pushnew :osc-level ocpg.targets))))
+        ocpg.unwatch)
   (push (watch (lambda ()
                  (get-val ocpg.all-targets-btn)
                  (dolist  (btn
@@ -430,5 +434,6 @@ context."
         ocpg.unwatch))
 
 (setup-ocpg-connections)
+(set-val ocpg.curr-preset 0)
 (trigger ocpg.all-targets-btn)
 (trigger ocpg.all-orgeln-btn)

@@ -32,17 +32,21 @@
 (defun connect-to-server (&key (remote-host *remote-host*)
                             (remote-port *remote-port*)
                             (local-host *local-host*)
-                            (local-port *local-port*))
+                            (local-port *local-port*)
+                            (protocol :udp))
   (when *oscin* (incudine.osc:close *oscin*))
-  (setf *oscin* (incudine.osc:open :host local-host :port local-port))
+  (setf *oscin* (incudine.osc:open :host local-host :port local-port :protocol protocol))
   (make-all-responders)
   (incudine:recv-start *oscin*)
   (when *oscout* (incudine.osc:close *oscout*))
-  (setf *oscout* (incudine.osc:open :host remote-host :port remote-port :direction :output))
+  (setf *oscout* (incudine.osc:open :host remote-host :port remote-port :protocol protocol :direction :output))
   (unless (eq (incudine:rt-status) :started)
     (error "incudine rt not running! Please start first!"))
   (incudine:at (incudine:now) #'incudine.osc:message *oscout*
                "/connect-client" "si" local-host local-port))
+
+  (incudine:at (incudine:now) #'incudine.osc:message *oscout*
+    "/connect-client" "si" *local-host* *local-port*)
 
 (defun disconnect-from-server ()
   (incudine:at (incudine:now) #'incudine.osc:message *oscout*
@@ -159,8 +163,11 @@ bp, gain, osc-level)."
            (incudine:make-osc-responder
             ,stream ,(format nil "/orgel~2,'0d/~a" (1+ orgelidx) (symbol-value target)) "ff"
             (lambda (faderno value)
-              (set-cell (aref (slot-value (aref *curr-state* ,orgelidx) target-sym) (round (1- (round faderno)))) value :src "osc")
-              (incudine.util:msg :info "orgel~2,'0d in: ~a ~a ~a~%" ,(1+ orgelidx) ,target (round faderno) value))))))
+              (incudine.util:msg :info "osc-in: /orgel~2,'0d/~a ~a ~a~%" ,(1+ orgelidx) ,target faderno value)
+              (set-cell (aref (slot-value (aref *curr-state* ,orgelidx) target-sym) (round (1- (round faderno)))) value :src "osc"))))))
+
+;;; (define-orgel-fader-responder 'osc-stream 0 :base-freq)
+
 
 (defmacro get-orgel-fader-responders (stream orgelidx targets)
   `(append
@@ -175,8 +182,8 @@ amps, etc.)"
            (incudine:make-osc-responder
             ,stream ,(format nil "/orgel~2,'0d/~a" (1+ orgelidx) (symbol-value target)) "f"
             (lambda (value)
-              (set-cell (slot-value (aref *curr-state* ,orgelidx) target-sym) value :src "osc")
-              (incudine.util:msg :info "orgel~2,'0d in: ~a ~a~%" ,(1+ orgelidx) ,target value))))))
+              (incudine.util:msg :info "osc-in: /orgel~2,'0d/~a ~a~%" ,(1+ orgelidx) ,target value)
+              (set-cell (slot-value (aref *curr-state* ,orgelidx) target-sym) value :src "osc"))))))
 
 ;;; (define-orgel-global-responder 'osc-stream 0 :base-freq)
 
@@ -216,8 +223,8 @@ amps, etc.)"
          (incudine:make-osc-responder
           ,stream "/notein"  "fff"
           (lambda (keynum velo channel)
-            (setf (val (aref (aref *midi-note-state* (round channel)) (round keynum))) (round velo))
-            (incudine.util:msg :info "notein: ~a ~a ~a~%" keynum velo channel)))))
+            (incudine.util:msg :info "notein: ~a ~a ~a~%" keynum velo channel)
+            (setf (val (aref (aref *midi-note-state* (round channel)) (round keynum))) (round velo))))))
 
 (defmacro define-preset-responder (stream path fn)
   `(incudine:make-osc-responder
@@ -380,7 +387,7 @@ amps, etc.)"
     (if (cdr form)
         (let ((address (format nil "/~a/~a" orgeltarget (first form))))
           (incudine:at (incudine:now) (lambda () (incudine.osc:message *oscout* address "sff" *client-id* (float (second form) 1.0) (float val 1.0))))
-          (incudine.util:msg :info "osc-out: ~a \"sff\" ~a ~a" address "sff" *client-id* (float (second form) 1.0) (float val 1.0)))
+          (incudine.util:msg :info "osc-out: ~a \"sff\" ~a ~a ~a" address *client-id* (float (second form) 1.0) (float val 1.0)))
         (let ((address (format nil "/~a/~a" orgeltarget (first form))))
           (incudine:at (incudine:now) (lambda () (incudine.osc:message *oscout* address "sf" *client-id* (float val 1.0))))
           (incudine.util:msg :info "osc-out: ~a \"sf\" ~a ~a" address *client-id* (float val 1.0))
@@ -392,5 +399,5 @@ amps, etc.)"
   (unless (eq (incudine:rt-status) :started) (error "Incudine dsp engine not started!"))
   (unless *client-id* (error "not connected to server, please start connection first!"))
   (let ((address (format nil "/~a/~a" orgel target)))
-    (incudine:at (incudine:now) (lambda () (incudine.osc:message *oscout* address "sff" *client-id* (float idx 1.0) (float val 1.0))))
-    (incudine.util:msg :info "osc-out: ~a \"sff\" ~a ~a" address "sff" *client-id* (float idx 1.0) (float val 1.0))))
+    (incudine.osc:message *oscout* address "sff" *client-id* (float idx 1.0) (float val 1.0))
+    (incudine.util:msg :info "osc-out: ~a \"sff\" ~a ~a ~a" address *client-id* (float idx 1.0) (float val 1.0))))

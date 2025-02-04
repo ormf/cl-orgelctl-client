@@ -43,7 +43,7 @@
   (init-orgel-keymaps)
   (start-keymap-note-responder)
   (incudine:recv-start *oscin*)
-  (connect-to-server)
+  (connect-to-server :protocol protocol)
   (setf *package* (find-package :cl-orgelctl)))
 
 ;;; (init-orgel-keymaps)

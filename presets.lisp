@@ -156,7 +156,7 @@ result-type is non-nil, return the results of fn in a sequence of type
               (setf (aref (slot-value (aref dest (1- orgelno)) (intern (symbol-name target) 'cl-orgelctl)) fader-idx)
                     (aref (slot-value (aref src (1- orgelno)) (intern (symbol-name target) 'cl-orgelctl)) fader-idx))))))))
 
-(defun store-preset (destno &key (orgelnos (mapcar #'1+ (range *orgelcount*)))
+(defun store-preset (destno &key (orgelnos (range 1 (1+ *orgelcount*)))
                               (targets (append *orgel-global-targets* *orgel-fader-targets*)))
   "store the values of *curr-state* into preset number /destno/ of
 *orgel-presets*. Filter by /orgelno/ and /targets/."
@@ -172,7 +172,7 @@ result-type is non-nil, return the results of fn in a sequence of type
      :orgelnos orgelnos
      :targets targets)))
 
-;;; (store-preset 2)
+;;; (store-preset 1)
 
 
 (defun recall-preset (srcno &key (orgelnos (mapcar #'1+ (range *orgelcount*)))
