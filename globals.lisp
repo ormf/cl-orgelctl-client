@@ -175,6 +175,16 @@ zerobased index.")
 
 ;;; (target-key->sym :level)
 
+(defun target-string->sym (key)
+  (cdr
+   (assoc key
+          '(("level" . level) ("delay" . delay) ("q" . q) ("gain" . gain)
+            ("osc-level" . osc-level) ("base-freq" . base-freq) ("phase" . phase)
+            ("bias-pos" . bias-pos) ("bias-bw" . bias-bw) ("bias-type" . bias-type)
+            ("main" . main) ("min-amp" . min-amp) ("max-amp" . max-amp)
+            ("ramp-up" . ramp-up) ("ramp-down" . ramp-down) ("exp-base" . exp-base))
+          :test #'string=)))
+
 (defparameter *orgel-level-meter-targets*
   '(:mlevel))
 

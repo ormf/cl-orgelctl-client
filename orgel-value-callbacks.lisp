@@ -84,8 +84,8 @@ events from the dsp engine)."
            (setf (set-cell-hook (slot-value global-orgel slot-sym))
                  (lambda (val &key src)
                    (incudine.util:msg :info "setup-ref-cell-hooks, orgel: ~a, slot-sym: ~a, val: ~a, src: ~a, to-server: ~a" (1+ orgelidx) slot-sym val src (and val (not (equal src "osc"))))
-                   (if (and val (not (equal src "osc")))
-                       (global-to-server (orgel-name (1+ orgelidx)) slot-key val))
+                   (if (and val (not (equal src "orgel-server")))
+                       (global-to-server (1+ orgelidx) slot-key val))
  ;;; call the defined route functions
                    (dolist (fn (slot-value (aref *osc-responder-registry* orgelidx) slot-sym))
                      (funcall fn val))))))
@@ -99,8 +99,8 @@ events from the dsp engine)."
                        (setf (set-cell-hook (aref (slot-value global-orgel slot-sym) faderidx))
                              (lambda (val &key src)
                                (incudine.util:msg :info "setup-ref-cell-hooks, orgel: ~a, slot-sym: ~a, partial: ~a, val: ~a, src: ~a" (1+ orgelidx) slot-sym partial val src)
-                               (if (and val (not (equal src "osc")))
-                                   (fader-to-server (orgel-name (1+ orgelidx)) slot-key partial val))
+                               (when (and val (not (equal src "orgel-server")))
+                                 (fader-to-server (1+ orgelidx) slot-key partial val))
 ;;;                               (format t "setting: ~a ~a ~a ~a~%" (orgel-name (1+ orgelidx)) slot-key (1+ faderidx) val)
  ;;; call the defined route functions
                                (dolist (fn (aref (slot-value (aref *osc-responder-registry* orgelidx) slot-sym) faderidx))
