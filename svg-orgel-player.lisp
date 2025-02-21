@@ -28,7 +28,7 @@
 (defun pending-orgel-notes-off ()
   (funcall cl-orgelctl::*keymap-note-responder-fn* :clear))
 
-(pushnew #'pending-orgel-notes-off cm.svgd:*stop-hooks*)
+(pushnew #'pending-orgel-notes-off clamps.svgd:*stop-hooks*)
 
 (in-package :cl-orgelctl)
 
@@ -58,7 +58,7 @@
 (events (import-quantize-midifile "~/work/selmafile/orm-unterricht/24-sose/syntaktische-grundlagen/24-05-14/tristan-auszüge/clemens-verklärung.mid" :transposition 18)
         (svg-gui-path "clemens-verklärung.svg"))
 
-(set-val cm.svgd:timescale (* 3/2 1/32))
+(set-val clamps.svgd:timescale (* 3/2 1/32))
 (svg->browser "robin-verklärung.svg")
 |#
 
