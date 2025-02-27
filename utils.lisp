@@ -21,7 +21,7 @@
 (in-package :cl-orgelctl)
 
 (defun key-to-sym (key)
-  (intern (format nil "~:@(~a~)" key)))
+  (intern (format nil "~:@(~a~)" key) 'cl-orgelctl))
 
 (defun orgel-val (orgelno slot &optional partialno)
   (if (member slot '(:level :osc-level :delay :q :gain))
