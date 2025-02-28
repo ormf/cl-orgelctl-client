@@ -21,6 +21,20 @@
 (ql:quickload "cl-orgelctl-client")
 (in-package :cl-orgelctl)
 
+(elt *curr-state* 0)
+(target-string->sym)
+(orgel-ctl-fader 1 :level 1 0.5)
+(orgel-ctl-fader 1 :level 1 0.2)
+
+(fader-to-server 1 :level 2 0.0)
+
+(incudine.osc:message )
+
+(incudine.osc:message *oscout* "/orgelctlfader" "sfsff" *client-id* 1.0 "level" 1.0 0.5)
+
+(setf (incudine.util:logger-level) :info)
+(setup-ref-cell-hooks)
+
 ;;; Evtl. (start-orgelctl-client...)
 ;;; und MIDI out -> MIDI in
 
