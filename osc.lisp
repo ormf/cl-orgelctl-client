@@ -308,17 +308,17 @@ amps, etc.)"
        (define-orgel-plist-responders ,stream)
        (define-orgel-flist-responders ,stream)
        (incudine::make-osc-responder
-        ,stream "/orgelctlfader" "sfsff"
+        ,stream "/orgelctlfader" "sisif"
         (lambda (src orgelno target faderno value)
           (incf *count*)
-          (incudine.util:msg :info "orgelctlfader in: ~S ~a ~S ~a ~a" src (round orgelno)  target (round faderno) value)
-          (set-cell (aref (slot-value (aref *curr-state* (round (1- orgelno))) (target-string->sym target)) (1- (round faderno))) value :src src)))
+          (incudine.util:msg :info "orgelctlfader in: ~S ~a ~S ~a ~a" src orgelno  target faderno value)
+          (set-cell (aref (slot-value (aref *curr-state* (1- orgelno)) (target-string->sym target)) (1- faderno)) value :src src)))
        (incudine::make-osc-responder
-        ,stream "/orgelctl" "sfsf"
+        ,stream "/orgelctl" "sisf"
         (lambda (src orgelno target value)
           (incf *count*)
-          (incudine.util:msg :info "orgelctl in: ~S ~a ~S ~a"  src (round orgelno) target value)
-          (set-cell (slot-value (aref *curr-state* (round (1- orgelno))) (target-string->sym target)) value :src src)))       
+          (incudine.util:msg :info "orgelctl in: ~S ~a ~S ~a"  src orgelno target value)
+          (set-cell (slot-value (aref *curr-state* (1- orgelno)) (target-string->sym target)) value :src src)))       
        ,@(loop for orgelidx below maxorgel
                collect `(define-orgel-level-meter-responder ,stream ,orgelidx))
        (define-orgel-ccin-responder ,stream)
@@ -393,20 +393,20 @@ amps, etc.)"
     (unless *client-id* (error "not connected to server, please start connection first!"))
     (if (cdr form)
         (progn
-          (incudine.util:msg :info "osc-out: /orgelctlfader \"sfsff\" ~a ~a ~S ~a ~a"
+          (incudine.util:msg :info "osc-out: /orgelctlfader \"sisif\" ~a ~a ~S ~a ~a"
                              *client-id* (float orgelno 1.0) (format nil "~a" (first form)) (float (second form) 1.0) (float val 1.0))
-          (incudine.osc:message *oscout* "/orgelctlfader" "sfsff"
-                                *client-id* (float orgelno 1.0) (format nil "~a" (first form)) (float (second form) 1.0) (float val 1.0)))
+          (incudine.osc:message *oscout* "/orgelctlfader" "sisif"
+                                *client-id* orgelno (format nil "~a" (first form)) (second form) (float val 1.0)))
         (progn
-          (incudine.util:msg :info "osc-out: /orgelctl \"sfsf\" ~a ~a ~S ~a"
-                             *client-id* (float orgelno 1.0) (format nil "~a" (first form)) (float val 1.0))
-          (incudine.osc:message *oscout* "/orgelctl" "sfsf"
+          (incudine.util:msg :info "osc-out: /orgelctl \"sisf\" ~a ~a ~S ~a"
+                             *client-id* orgelno (format nil "~a" (first form)) (float val 1.0))
+          (incudine.osc:message *oscout* "/orgelctl" "sisf"
                                 *client-id* (float orgelno 1.0) (format nil "~a" (first form)) (float val 1.0))))))
 
-(defun fader-to-server (orgelno target idx val)
+(defun fader-to-server (orgelno target partialno val)
   "send orgel fader slot values to the lisp server via osc."
   (unless *client-id* (error "not connected to server, please start connection first!"))
-  (incudine.util:msg :info "osc-out: /orgelctlfader ~a \"sfsff\" ~a ~S ~a ~a"
-                     *client-id* (float orgelno 1.0) (format nil "~a" target) (float idx 1.0) (float val 1.0))
-  (incudine.osc:message *oscout* "/orgelctlfader" "sfsff"
-                        *client-id* (float orgelno 1.0) (format nil "~a" target) (float idx 1.0) (float val 1.0)))
+  (incudine.util:msg :info "osc-out: /orgelctlfader ~a \"sisif\" ~a ~S ~a ~a"
+                     *client-id* orgelno (format nil "~a" target) partialno (float val 1.0))
+  (incudine.osc:message *oscout* "/orgelctlfader" "sisif"
+                        *client-id* orgelno (format nil "~a" target) partialno (float val 1.0)))
