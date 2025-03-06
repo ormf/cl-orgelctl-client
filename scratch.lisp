@@ -21,6 +21,8 @@
 (ql:quickload "cl-orgelctl-client")
 (in-package :cl-orgelctl)
 
+(all-responders *oscin*)
+
 (elt *curr-state* 0)
 (target-string->sym)
 (orgel-ctl-fader 1 :level 1 0.5)

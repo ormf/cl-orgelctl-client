@@ -401,7 +401,7 @@ amps, etc.)"
           (incudine.util:msg :info "osc-out: /orgelctl \"sisf\" ~a ~a ~S ~a"
                              *client-id* orgelno (format nil "~a" (first form)) (float val 1.0))
           (incudine.osc:message *oscout* "/orgelctl" "sisf"
-                                *client-id* (float orgelno 1.0) (format nil "~a" (first form)) (float val 1.0))))))
+                                *client-id* orgelno (format nil "~a" (first form)) (float val 1.0))))))
 
 (defun fader-to-server (orgelno target partialno val)
   "send orgel fader slot values to the lisp server via osc."
