@@ -2,7 +2,7 @@
 
 (when (find-package :slynk) (pushnew :slynk *features*))
 (when (find-package :swank) (pushnew :swank *features*))
-(pushnew :cuda-usocket-osc *features*)
+;;; (pushnew :cuda-usocket-osc *features*)
 
 (asdf:defsystem #:cl-orgelctl-client
   :description "Remote Controller für HfMDK Orgelprojekt 2022-24"
@@ -13,7 +13,7 @@
   :serial t
   :components ((:file "package")
 ;;;               (:file "svg-export")
-               (:file "websocket-server")
+;;;               (:file "websocket-server")
                (:file "structs")
                (:file "globals")
                (:file "cl-refs-cellctl")
