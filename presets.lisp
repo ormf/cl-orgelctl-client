@@ -201,7 +201,7 @@ result-type is non-nil, return the results of fn in a sequence of type
 
 (defun digest-route-preset (preset-num form &key (reset t))
   (setf (aref *route-presets* preset-num) form)
-  (recall-orgel-preset (getf form :preset))
+;;  (recall-orgel-preset (getf form :preset))
   (digest-routes (getf form :routes) :reset reset))
 
 (defun save-route-presets (&optional (file *route-presets-file*))

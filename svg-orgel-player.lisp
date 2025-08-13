@@ -20,10 +20,10 @@
 ;;;
 ;;; **********************************************************************
 
-(in-package :cm)
+(in-package :clamps)
 
 (defparameter *svg-orgel-play-unwatch* nil)
-(defparameter *svg-orgel-play-toggle* (make-ref 0.0))
+(defparameter *svg-orgel-play-toggle* (cl-refs:make-ref 0.0))
 
 (defun pending-orgel-notes-off ()
   (funcall cl-orgelctl::*keymap-note-responder-fn* :clear))
