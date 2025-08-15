@@ -8,5 +8,5 @@
 ;; ;;; #:orgel-meters
 ;;                           #:orgel-main #:orgel-bias-bw #:orgel-bias-pos #:start-orgel-gui)
   (:use #:cl #:clamps #:cellctl)
-  
+  (:export #:orgel-ctl-fader #:orgel-ctl)
   )
