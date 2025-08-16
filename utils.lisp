@@ -158,11 +158,11 @@ respect to the range [0..1] (0->1, 1->0, 0.5->0.5, 0.2-0.8) if
   (loop for x below 16 collect (aref permutation x)))
 |#
 
-(defmacro n-exp (x min max)
+(defun n-exp (x min max)
   (let ((quot (if (zerop min) 0 (/ max min))))
-    `(if (zerop ,x)
-         ,min
-         (* ,min (expt ,quot ,x)))))
+    (if (zerop x)
+        min
+        (* min (expt quot x)))))
 
 (defun n-lin (x min max)
   (let ((diff (- max min)))
