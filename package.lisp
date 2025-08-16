@@ -7,5 +7,9 @@
 ;; ;;; #:orgel-meters
 ;;                           #:orgel-main #:orgel-bias-bw #:orgel-bias-pos #:start-orgel-gui)
   (:use #:cl #:clamps #:cellctl)
-  (:export #:orgel-ctl-fader #:orgel-ctl)
+  (:export #:start-orgelctl-client #:orgel-ctl-fader #:orgel-ctl)
   )
+
+(in-package :cl-user)
+
+(import 'cl-orgelctl:start-orgelctl-client)
