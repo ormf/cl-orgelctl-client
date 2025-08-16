@@ -13,15 +13,16 @@
 
 (defun start-orgelctl-client (&key (local-host "127.0.0.1")
                                 (remote-host "127.0.0.1")
+                                ip
                                 (protocol :udp))
 ;;;  (ats-cuda::start-ats-cuda-server)
   (clamps)
   (define-elisp-code)
   (load-orgel-presets)
   (load-route-presets)
-  (setf *local-host* local-host)
+  (setf *local-host* (or ip local-host))
   (setf *local-port* 3016)
-  (setf *remote-host* remote-host)
+  (setf *remote-host* (or ip remote-host))
   (setf *remote-port* 3011)
   (if *oscout* (incudine.osc:close *oscout*))
   (if *oscin* (incudine.osc:close *oscin*))
